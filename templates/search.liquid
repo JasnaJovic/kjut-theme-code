@@ -1,0 +1,203 @@
+<!-- /templates/search.liquid -->
+
+{%- comment -%}
+	Check to enforce respond.js
+{%- endcomment -%}
+{%- assign enable_infinity_scroll = settings.enable_infinity_scroll -%}
+{%- assign respond_js_secret_key = shop.domain | md5 -%}
+
+<section class="search-page" data-section-type="search-template" data-section-id="{{ section.id }}">
+	{%- unless search.terms == respond_js_secret_key -%}
+
+		{%- comment -%}
+			Avoid accessing search.results before the opening paginate tag.
+			If you do, the pagination of results will be broken.
+		{%- endcomment -%}
+		{%- paginate search.results by 10 -%}
+
+		{%- comment -%}
+			Set grid_results to true and set search results as a grid instead of a list.
+			This works well when your search is only for products.
+		{%- endcomment -%}
+		{%- assign grid_results = false -%}
+
+			<div class="grid--full wrapper wrapper--medium">
+				<div class="grid__item">
+
+					{%- if search.performed -%}
+						{%- if search.results_count == 0 -%}
+							<h1 class="text-center">{{ 'general.search.no_results_html' | t: terms: search.terms }}</h1>
+						{%- else -%}
+							<h1 class="text-center">{{ 'general.search.results_for_html' | t: terms: search.terms }}</h1>
+						{%- endif -%}
+					{%- endif -%}
+
+					{%- render 'search-bar' -%}
+
+					<hr class="hr--clear">
+
+					{%- if search.performed -%}
+
+						<div class="grid-uniform" {% if enable_infinity_scroll %} id="AjaxinateLoop"{% endif %}>
+							{%- for item in search.results -%}
+								{%- comment -%}
+									Check if the product is on sale and set a variable to be used below.
+								{%- endcomment -%}
+								{%- assign on_sale = false -%}
+								{%- if item.compare_at_price > item.price -%}
+									{%- assign on_sale = true -%}
+								{%- endif -%}
+
+								{%- comment -%}
+									Check if the product is sold out and set a variable to be used below.
+								{%- endcomment -%}
+								{%- assign sold_out = true -%}
+								{%- if item.available -%}
+									{%- assign sold_out = false -%}
+								{%- endif -%}
+
+								{%- if grid_results == false -%}
+									{%- comment -%} begin list search results {%- endcomment -%}
+									<div class="grid__item">
+										<div class="grid">
+											{%- if item.featured_image -%}
+												{%- comment -%}
+													We have a featured_image, so it's likely a product
+												{%- endcomment -%}
+												<div class="grid__item one-third">
+													<a href="{{ item.url }}" title="{{ item.title | escape }}">
+														{{- item.featured_image.src | img_url: 'medium' | img_tag: item.featured_image.alt -}}
+													</a>
+												</div>
+												{%- endif -%}
+											{%- comment -%}
+											Output that article image up in hurr
+											{%- endcomment -%}
+										{%- if item.object_type == 'article' -%}
+											{%- if item.image -%}
+												<div class="grid__item one-third">
+													<a href="{{ item.url }}">
+														<img src="{{ item.image.src | img_url: 'large' }}">
+													</a>
+												</div>
+												{%- endif -%}
+											{%- endif -%}
+
+											<div class="grid__item two-thirds">
+												<h3>{{ item.title | link_to: item.url }}</h3>
+
+												{%- if item.price -%}
+													<p>
+														{%- comment -%}
+															You can show a leading 'from' or 'up to' by checking 'product.price_varies'
+															if your variants have different prices.
+														{%- endcomment -%}
+														{%- if on_sale -%}
+															{%- if item.price_varies -%}
+																{%- assign sale_price = item.price | money -%}
+																{{ 'products.product.on_sale_from_html' | t: price: sale_price }}
+															{%- else -%}
+																{{ 'products.product.on_sale' | t }}
+																<span>{{ item.price | money }}</span>
+															{%- endif -%}
+														{%- else -%}
+															{%- if item.price_varies -%}
+																{%- assign price = item.price | money -%}
+																<span>{{ 'products.general.from_text_html' | t: price: price }}</span>
+															{%- else -%}
+																<span>{{ item.price | money }}</span>
+															{%- endif -%}
+														{%- endif -%}
+
+														{%- if sold_out -%}
+															{{ 'products.product.sold_out' | t }}
+														{%- endif -%}
+
+														{%- if on_sale -%}
+															<span class="visually-hidden">{{ 'products.general.sale_price' | t }}</span>
+															<s>{{ item.compare_at_price | money }}</s>
+														{%- endif -%}
+													</p>
+												{%- endif -%}
+
+												{%- comment -%}
+													Get a brief excerpt of raw text from the page/product
+												{%- endcomment -%}
+												<p>{{ item.content | strip_html | truncatewords: 50 }}</p>
+											</div>
+										</div>
+										<hr>
+									</div>
+									{%- comment -%} list search results {%- endcomment -%}
+								{%- else -%}
+									{%- comment -%} begin grid search results {%- endcomment -%}
+									<div class="grid__item search-result large--one-third medium--one-third">
+										{%- if item.featured_image -%}
+											<a href="{{ item.url | within: collection }}" title="{{ item.title | escape }}">
+												{{ item.featured_image.src | img_url: 'medium' | img_tag: item.featured_image.alt }}
+											</a>
+										{%- endif -%}
+
+										<h5>{{ item.title | link_to: item.url }}</h5>
+
+										{%- if item.price -%}
+											<p>
+												{%- if on_sale -%}
+													{%- if item.price_varies -%}
+														{%- assign sale_price = item.price | money -%}
+														{{ 'products.product.on_sale_from_html' | t: price: sale_price }}
+													{%- else -%}
+														{{ 'products.product.on_sale' | t }}
+														<span>{{ item.price | money }}</span>
+													{%- endif -%}
+												{%- else -%}
+													{%- if item.price_varies -%}
+														{%- assign price = item.price | money -%}
+														<span>{{ 'products.general.from_text_html' | t: price: price }}</span>
+													{%- else -%}
+														<span>{{ item.price | money }}</span>
+													{%- endif -%}
+												{%- endif -%}
+												{%- if sold_out -%}
+													{{ 'products.product.sold_out' | t }}
+												{%- endif -%}
+												{%- if on_sale -%}
+													<s>{{ item.compare_at_price | money }}</s>
+												{%- endif -%}
+											</p>
+										{%- else -%}
+											<p>{{ item.content | strip_html | truncatewords: 50 }}</p>
+										{%- endif -%}
+									</div>
+									{%- comment -%} grid search results {%- endcomment -%}
+								{%- endif -%}
+
+							{%- endfor -%}
+						</div>
+
+						{%- if enable_infinity_scroll -%}
+							<div class="pagination" id="AjaxinatePagination">
+								{%- if paginate.next -%}
+									<div class="pagination__loading">
+										<a href="{{ paginate.next.url }}">{{ 'collections.pagination.loading' | t }}<span class="dots dots--animated"><span>.</span><span>.</span><span>.</span></span></a>
+									</div>
+								{%- endif -%}
+							</div>
+						{%- else -%}
+							{%- if paginate.pages > 1 -%}
+								{%- render 'pagination', paginate: paginate -%}
+							{%- endif -%}
+						{%- endif -%}
+
+					{%- endif -%}
+
+				</div>
+			</div>
+
+		{%- endpaginate -%}
+
+	{%- else -%}
+		{%- render 'respond' -%}
+		{%- layout none -%}
+	{%- endunless -%}
+</section>
