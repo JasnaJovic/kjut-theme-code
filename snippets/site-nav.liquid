@@ -1,0 +1,320 @@
+<!-- /snippets/site-nav.liquid -->
+{%- assign has_logo = false -%}
+{%- if section.settings.logo != blank or section.settings.logo_not_home != blank or section.settings.show_shop_name -%}
+	{%- assign has_logo = true -%}
+{%- endif -%}
+
+<nav class="navigation" role="navigation" id="NavStandard">
+	<ul class="nav nav--default" id="AccessibleNav">
+
+		<li class="nav__item nav__item--compress">
+			<button type="button" class="icon-fallback-text nav__link nav__link--icon js-drawer-open-nav" aria-controls="NavDrawer" data-drawer="left">
+				<span class="visually-hidden">{{ 'general.accessibility.open_cart' | t }}</span>
+				<span class="icon custom-icon-hamburger" aria-hidden="true"></span>
+			</button>
+			<a href="{{ routes.cart_url }}" class="cart__toggle {% unless template == 'cart' or settings.cart_type == 'page' %}js-drawer-open-cart{% endunless %}" aria-controls="CartDrawer" aria-expanded="false" data-drawer="right">
+				{{ 'layout.cart.title' | t }}
+				<span class="inline-parenthesis">(</span><span class="CartCount">{{ cart.item_count }}</span><span class="inline-parenthesis">)</span>
+			</a>
+		</li>
+
+		{%- for link in linklists[section.settings.main-menu].links -%}
+
+			{%- capture dropdown_links -%}
+				{%- if link.links != blank -%}
+					{%- for sub_link in link.links -%}
+						<li class="dropdown__item dropdown__item--level-2{% if forloop.index == 1 %} dropdown__item--level-2--first{% endif %}{% if forloop.index == link.links.size %} dropdown__item--level-2--last{% endif %}{% if sub_link.levels == 1 %} dropdown__item--has-items{% endif %}" {% if sub_link.levels == 1 %}aria-haspopup="true"{% endif %}>
+							<a href="{{ sub_link.url }}" class="dropdown__link dropdown__link--level-2{% if sub_link.active %} dropdown__link--active{% endif %}">
+								{{- sub_link.title | escape -}}
+							</a>
+
+							{%- if sub_link.levels == 1 -%}
+								<button class="dropdown__trigger dropdown__trigger--level-2 dropdown__trigger--hover" aria-controls="NavDropdown--{{ link.handle }}-{{ sub_link.handle }}-{{ forloop.index0 }}" aria-expanded="false">
+									<span class="visually-hidden">{{ 'general.accessibility.show_submenu' | t }}</span>
+									{%- render 'icon-dropdown-arrow' -%}
+								</button>
+
+								<ul id="NavDropdown--{{ link.handle }}-{{ sub_link.handle }}-{{ forloop.index0 }}" class="dropdown dropdown--level-3" aria-hidden="true">
+									{%- for sub_sub_link in sub_link.links -%}
+										<li class="dropdown__item dropdown__item--level-3{% if forloop.index == 1 %} dropdown__item--level-3--first{% endif %}">
+											<a class="dropdown__link dropdown__link--level-3" href="{{ sub_sub_link.url }}">
+												{{- sub_sub_link.title | escape -}}
+											</a>
+										</li>
+									{%- endfor -%}
+								</ul>
+							{%- endif -%}
+
+						</li>
+					{%- endfor -%}
+				{%- endif -%}
+			{%- endcapture -%}
+
+			{%- if section.blocks.size > 0 -%}
+				{%- for block in section.blocks -%}
+					{%- assign link_title = link.title | escape | downcase -%}
+					{%- assign megamenu_title = block.settings.title | escape | downcase -%}
+					{%- assign megamenu = '' -%}
+					{%- assign dropdown_links_and_image = '' -%}
+
+					{%- case block.type -%}
+
+						{%- when 'megamenu' -%}
+							{%- capture megamenu -%}
+								{%- if link_title == megamenu_title -%}
+
+									{%- assign megamenu_images_count = 0 -%}
+
+									{%- capture megamenu_images -%}
+										{%- for i in (1..4) -%}
+											{%- assign image_key = i | prepend: 'image_' -%}
+											{%- assign heading_key = i | prepend: 'title_' -%}
+											{%- assign link_key = i | prepend: 'link_' -%}
+
+											{%- assign image = block.settings[image_key] -%}
+											{%- assign heading = block.settings[heading_key] -%}
+											{%- assign image_link = block.settings[link_key] -%}
+
+											{%- if image != blank or heading != blank -%}
+												{%- assign megamenu_images_count = megamenu_images_count | plus: 1 -%}
+												<div class="megamenu__image{% if image == blank %} megamenu__image--no-image{% endif %}" {{ block.shopify_attributes }}>
+													{%- unless image == blank -%}
+														{%- capture megamenu_image -%}
+															<div class="megamenu__image-bg lazyload"
+																data-bgset="{% render 'bgset', image: image %}"
+																data-sizes="auto"
+																data-parent-fit="cover"
+																style="padding-top: {{ section.settings.image_aspect_ratio | times: 100 | append: '%' }};"
+															></div>
+															<noscript>
+																<div class="megamenu__image-bg" style="background-image: url( {{ image | img_url: '1024x1024' }} ); padding-top: {{ section.settings.image_aspect_ratio | times: 100 | append: '%' }};"></div>
+															</noscript>
+														{%- endcapture -%}
+
+														{%- unless image_link == blank -%}
+															<a href="{{ image_link }}" class="megamenu__link">{{ megamenu_image }}</a>
+														{%- else -%}
+															{{- megamenu_image -}}
+														{%- endunless -%}
+													{%- endunless -%}
+
+													{%- unless heading == blank -%}
+														<a {% if image_link != blank %}href="{{ image_link }}"{% endif %} class="megamenu__image-button megamenu__link">{{ heading }}</a>
+													{%- endunless -%}
+												</div>
+											{%- endif -%}
+										{%- endfor -%}
+									{%- endcapture -%}
+
+									{%- capture megamnu_links -%}
+										{%- if link.links != blank -%}
+											{%- for sub_link in link.links -%}
+												<ul class="megamenu__links megamenu__links--level-2">
+													<li class="megamenu__item megamenu__item--level-2">
+														<a href="{{ sub_link.url }}" class="megamenu__link megamenu__link--heading{% if sub_link.active %} megamenu__link--active{% endif %}">
+															{{- sub_link.title | escape -}}
+														</a>
+
+														{%- if sub_link.levels == 1 -%}
+															<ul class="megamenu__links megamenu__links--level-3" aria-expanded="false">
+																{%- for sub_sub_link in sub_link.links -%}
+																	<li class="megamenu__item megamenu__item--level-3">
+																		<a class="megamenu__link megamenu__link--level-3" href="{{ sub_sub_link.url }}">
+																			{{- sub_sub_link.title | escape -}}
+																		</a>
+																	</li>
+																{%- endfor -%}
+															</ul>
+														{%- endif -%}
+													</li>
+												</ul>
+											{%- endfor -%}
+										{%- endif -%}
+									{%- endcapture -%}
+
+									<div id="NavDropdown--{{ link.handle }}-{{ forloop.index0 }}" class="megamenu megamenu--{{ block.settings.images_position }} megamenu--links-{{ link.links.size }}{% if megamenu_images == blank %} megamenu--no-images{% endif %}" data-levels="{{ link.levels }}" aria-hidden="true">
+										<div class="wrapper">
+											<div class="megamenu-inner">
+
+												{%- unless megamenu_images == blank -%}
+													<div class="megamenu__images megamenu__images--{{ megamenu_images_count }}{% if link.links == empy %} megamenu__images--no-links{% endif %}">
+														{{- megamenu_images -}}
+													</div>
+
+													{%- unless block.settings.images_position == 'stacked' -%}
+														{%- for i in (2..megamenu_images_count) -%}
+															<div class="megamenu__push"></div>
+														{%- endfor -%}
+													{%- endunless -%}
+												{%- endunless -%}
+
+												{{- megamnu_links -}}
+											 </div>
+										</div>
+									</div>
+									{%- comment -%} END MEGAMENU WRAPPER {%- endcomment -%}
+									{%- break -%}
+								{%- endif -%}
+							{%- endcapture -%}
+
+						{%- when 'dropdown_image' -%}
+							{%- capture dropdown_links_and_image -%}
+								{%- assign link_title = link.title | escape | downcase -%}
+								{%- assign megamenu_title = block.settings.title | escape | downcase -%}
+
+								{%- if link_title == megamenu_title -%}
+
+									{%- capture dropdown_image -%}
+										{%- assign image = block.settings.image -%}
+										{%- assign image_link = block.settings.link -%}
+										{%- assign image_position = block.settings.image_position -%}
+
+										{%- unless image_link == blank -%}
+											<a href="{{ image_link }}" class="dropdown__link dropdown__link--image">
+										{%- endunless -%}
+
+										{%- unless image == blank -%}
+											<div class="dropdown__image-container" style="padding-top: {{ section.settings.image_aspect_ratio | times: 100 | append: '%' }};">
+												<div class="dropdown__image-bg lazyload"
+													data-bgset="{% render 'bgset', image: image %}"
+													data-sizes="auto"
+													data-parent-fit="cover"
+												></div>
+												<noscript>
+													<div class="dropdown__image-bg" style="background-image: url( {{ image | img_url: '1024x1024' }} ); padding-top: {{ section.settings.image_aspect_ratio | times: 100 | append: '%' }};"></div>
+												</noscript>
+											</div>
+										{%- else -%}
+											<div class="dropdown__image-container dropdown__image-container--placeholder">
+												<div class="placeholder-svg placeholder-svg--overlayed">
+													{{- 'image' | placeholder_svg_tag: 'placeholder-svg-filled' -}}
+												</div>
+											</div>
+										{%- endunless -%}
+
+										{%- unless image_link == blank -%}
+											</a>
+										{%- endunless -%}
+
+									{%- endcapture -%}
+
+									{%- capture dropdown_image_links -%}
+										{%- if link.links != blank -%}
+											{%- for sub_link in link.links -%}
+												<li class="dropdown__item dropdown__item--level-2{% if sub_link.levels == 1 %} dropdown__item--has-items dropdown__item--collapsible{% endif %}" {% if sub_link.levels == 1 %}aria-haspopup="true"{% endif %}>
+													<a href="{{ sub_link.url }}" class="dropdown__link dropdown__link--level-2{% if sub_link.levels == 1 %} dropdown__link--collapsible{% endif %}{% if sub_link.active %} dropdown__link--active{% endif %}">
+														{{- sub_link.title | escape -}}
+													</a>
+
+													{%- if sub_link.levels == 1 -%}
+														<button class="dropdown__trigger dropdown__trigger--collapsible" aria-controls="NavDropdown--{{ link.handle }}-{{ sub_link.handle }}-{{ forloop.index0 }}" aria-expanded="false" data-collapsible-trigger>
+															<span class="visually-hidden">{{ 'general.accessibility.show_submenu' | t }}</span>
+															{%- render 'icon-plus-minus' -%}
+														</button>
+														<div id="NavDropdown--{{ link.handle }}-{{ sub_link.handle }}-{{ forloop.index0 }}" class="dropdown__links-container" aria-hidden="true" data-collapsible-container>
+															<ul class="dropdown__links dropdown__links--level-3" data-collapsible-content>
+																{%- for sub_sub_link in sub_link.links -%}
+																	<li class="dropdown__item dropdown__item--level-3">
+																		<a class="dropdown__link dropdown__link--level-3" href="{{ sub_sub_link.url }}">
+																			{{- sub_sub_link.title | escape -}}
+																		</a>
+																	</li>
+																{%- endfor -%}
+															</ul>
+														</div>
+													{%- endif -%}
+												</li>
+											{%- endfor -%}
+										{%- endif -%}
+									{%- endcapture -%}
+
+									<div id="NavDropdown--{{ link.handle }}-{{ forloop.index0 }}" class="dropdown dropdown--level-2 dropdown--has-image{% if image_position == 'right' %} dropdown--has-image--reversed{% endif %}" data-levels="{{ link.levels }}" aria-hidden="true">
+										<div class="dropdown__image dropdown__image--{{ image_position }}{% if dropdown_links == blank %} dropdown__image--no-links{% endif %}" {{ block.shopify_attributes }}>
+											{{- dropdown_image -}}
+										</div>
+
+										{%- if dropdown_image_links != blank -%}
+											<ul class="dropdown__links dropdown__links--has-image">
+												{{- dropdown_image_links -}}
+											</ul>
+										{%- endif -%}
+									</div>
+
+									{%- break -%}
+								{%- endif -%}
+							{%- endcapture -%}
+					{%- endcase -%}
+
+				{%- endfor -%}
+			{%- endif -%}
+
+			{%- if dropdown_links != blank or dropdown_links_and_image != blank or megamenu != blank -%}
+				<li class="nav__item nav__item--level-1 nav__item--has-items nav__item--default{% if megamenu != blank %} nav__item--has-megamenu{% else %} nav__item--has-dropdown{% endif %}{% if dropdown_links_and_image != blank %} nav__item--has-dropdown--image{% endif %}" aria-haspopup="true">
+					<a href="{{ link.url }}" class="nav__link{% if link.active %} nav__link--active{% endif %}">
+						{{- link.title | escape -}}
+					</a>
+					<button class="dropdown__trigger dropdown__trigger--level-1 dropdown__trigger--hover" aria-controls="NavDropdown--{{ link.handle }}-{{ forloop.index0 }}" aria-expanded="false">
+						<span class="visually-hidden">{{ 'general.accessibility.show_submenu' | t }}</span>
+						{%- render 'icon-dropdown-arrow' -%}
+					</button>
+
+					{%- if megamenu != blank -%}
+						{{- megamenu -}}
+					{%- elsif dropdown_links_and_image != blank -%}
+						{{- dropdown_links_and_image -}}
+					{%- elsif dropdown_links != blank -%}
+						<div id="NavDropdown--{{ link.handle }}-{{ forloop.index0 }}" class="dropdown" data-levels="{{ link.levels }}" aria-hidden="true">
+							<ul class="dropdown__links">
+								{{- dropdown_links -}}
+							</ul>
+						</div>
+					{%- endif -%}
+
+				</li>
+			{%- else -%}
+				<li class="nav__item nav__item--level-1 nav__item--default">
+					<a href="{{ link.url }}" class="nav__link{% if link.active %} nav__link--active{% endif %}">{{ link.title | escape }}</a>
+				</li>
+			{%- endif -%}
+		{%- endfor -%}
+
+		<li class="nav__item nav__item--default nav__item--icons">
+			<ul class="nav__icons">
+				{%- if shop.customer_accounts_enabled -%}
+					<li class="nav__item nav__item--icon">
+						<a href="{{ routes.account_url }}" class="nav__link nav__link--icon">
+							{%- render 'icon-user' -%}
+						</a>
+					</li>
+				{%- endif -%}
+
+				{%- if section.settings.show_search -%}
+					<li class="nav__item nav__item--icon">
+						<button class="nav__link nav__link--icon" data-nav-search-open>
+							<span class="visually-hidden">{{ 'general.accessibility.open_search_bar' | t }}</span>
+							{%- render 'icon-search' -%}
+						</button>
+					</li>
+				{%- endif -%}
+
+				<li class="nav__item nav__item--icon">
+					<a href="{{ routes.cart_url }}" class="nav__link nav__link--icon cart__toggle {% unless template == 'cart' or settings.cart_type == 'page' %}js-drawer-open-cart{% endunless %}" aria-controls="CartDrawer" aria-expanded="false" data-drawer="right">
+						{%- render 'icon-shopping-bag' -%}
+						<span id="CartCount" class="CartCount">{{ cart.item_count }}</span>
+					</a>
+				</li>
+			</ul>
+		</li>
+	</ul>
+</nav>
+
+<div class="mobile-menu largest--hide">
+	<button type="button" class="mobile-menu__toggle icon-fallback-text js-drawer-open-nav" aria-controls="NavDrawer" data-drawer="left">
+		<span class="visually-hidden">{{ 'general.accessibility.mobile_menu_toggle' | t }}</span>
+		<span class="icon custom-icon-hamburger" aria-hidden="true"></span>
+	</button>
+	<a href="{{ routes.cart_url }}" class="cart__toggle {% unless template == 'cart' or settings.cart_type == 'page' %}js-drawer-open-cart{% endunless %}" aria-controls="CartDrawer" aria-expanded="false" data-drawer="right">
+		{{ 'layout.cart.title' | t }}
+		<span class="inline-parenthesis">(</span><span class="CartCount">{{ cart.item_count }}</span><span class="inline-parenthesis">)</span>
+	</a>
+</div>

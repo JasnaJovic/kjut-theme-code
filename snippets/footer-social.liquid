@@ -1,0 +1,27 @@
+{%- if settings.social_facebook_link != blank or settings.social_twitter_link != blank or settings.social_pinterest_link != blank or settings.social_instagram_link != blank -%}
+  <div class="social-sharing-wrapper">
+    {%- if settings.social_facebook_link != blank -%}
+      <a class="facebook" rel="noopener" href = "{{settings.social_facebook_link }}">
+        <i class="custom-icon-facebook"></i >
+      </a>
+    {%- endif -%}
+
+    {%- if settings.social_twitter_link != blank -%}
+      <a class="twitter" rel="noopener" href = "{{ settings.social_twitter_link }}">
+        <i class="custom-icon-twitter"></i>
+      </a>
+    {%- endif -%}
+
+    {%- if settings.social_pinterest_link != blank -%}
+      <a class="pinterest" rel="noopener" href = "{{settings.social_pinterest_link }}">
+        <i class="custom-icon-pinterest"></i>
+      </a>
+    {%- endif -%}
+
+    {%- if settings.social_instagram_link != blank -%}
+      <a class="instagram" rel="noopener" href = "{{ settings.social_instagram_link }}">
+        <i class="custom-icon-instagram"></i>
+      </a>
+    {%- endif -%}
+  </div>
+{%- endif -%}

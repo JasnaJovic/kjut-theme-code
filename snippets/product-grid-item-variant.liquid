@@ -1,0 +1,113 @@
+
+{%- assign num_rows = settings.product_grid_columns_desktop | plus: 0 -%}
+
+{%- if num_rows == 1 -%}
+  {%- assign grid_item_width = 'medium--one-whole large--one-whole' -%}
+{%- elsif num_rows == 2 -%}
+  {%- assign grid_item_width = 'medium--one-half large--one-half' -%}
+{%- elsif num_rows == 3 -%}
+  {%- assign grid_item_width = 'medium--one-half large--one-third' -%}
+{%- elsif num_rows == 4 -%}
+  {%- assign grid_item_width = 'medium--one-half large--one-quarter' -%}
+{%- endif -%}
+
+{%- assign num_rows_mobile = settings.product_grid_columns_mobile | plus: 0 -%}
+{%- if num_rows_mobile == 1 -%}
+  {%- assign grid_item_width =  grid_item_width | append: ' small--one-whole' -%}
+{%- elsif num_rows_mobile == 2 -%}
+  {%- assign grid_item_width = grid_item_width | append: ' small--one-half' -%}
+{%- endif -%}
+
+{%- assign tag = false -%}
+{%- if variant.available -%}
+	{%- assign sold_out = false -%}
+{%- else -%}
+	{%- assign sold_out = true -%}
+	{%- assign tag = true -%}
+{%- endif -%}
+
+{%- if variant.compare_at_price_min > variant.price_min -%}
+	{%- if sold_out -%}
+		{%- assign on_sale = false -%}
+	{%- else -%}
+		{%- assign on_sale = true -%}
+		{%- assign tag = true -%}
+	{%- endif -%}
+{%- else -%}
+	{%- assign on_sale = false -%}
+{%- endif -%}
+
+
+{%- assign current_variant = product.selected_or_first_available_variant -%}
+{%- assign featured_media = product.featured_media -%}
+
+<div class="text-center {{ grid_item_width }}{% if enable_carousel %} featured-collection__item{% endif %}{% if tag %} has-tag{% endif %}"
+     data-product-id="{{ variant.id }}">
+  <div class="product-grid-item">
+    {%- comment -%} Image {%- endcomment -%}
+    <div class="product-grid-item__image">
+      {%- assign image = variant.image -%}
+      <a
+         href="{{ variant.url }}"
+         class="product__media product__media--featured {% unless remove_lazyload %}lazyload{% endunless %}"
+         data-bgset="{% render 'bgset', image: image %}"
+         data-sizes="auto"
+         data-parent-fit="{{ settings.image_size }}"
+         data-aspectratio="{{ image.aspect_ratio }}">
+        <span class="visually-hidden">{{ 'general.accessibility.slide_image' | t }}</span>
+      </a>
+      
+    </div>
+
+    {% comment %} Product info {% endcomment %}
+    <div class="product-grid-item__info">
+      {% comment %} Title {% endcomment %}
+      <a class="product-grid-item__title" href="{{ variant.url }}">{{- product_title | escape -}}&nbsp{{ variant.option1 }}
+      </a>
+
+      {%- if show_review_stars -%}
+      {%- if enable_reviews or settings.enable_yotpo and settings.yotpo_ID != '' -%}
+      {%- if settings.enable_yotpo and settings.yotpo_ID != '' -%}
+      <div class="product__badge product__badge--yotpo">
+        <div class="yotpo bottomLine" data-product-id="{{ product.id }}"></div>
+      </div>
+      {%- elsif enable_reviews -%}
+      <div class="product__badge">
+        <span class="shopify-product-reviews-badge" data-id="{{ product.id }}"></span>
+      </div>
+      {%- endif -%}
+      {%- endif -%}
+      {%- endif -%}
+
+      {% comment %} Price {% endcomment %}
+      <a class="product-grid-item__price price" href="{{ product.url | within: collection }}">
+        {% if on_sale == true %}
+        {{ variant.price | money }}
+        <s>{{ variant.compare_at_price | money }}</s>
+        {% else %}
+        {{ variant.price | money }}
+        {% endif %}
+
+        {%- if current_variant.unit_price_measurement -%}
+        <span class="product-unit-price">
+          {{ current_variant.unit_price | money }}
+          {%- if current_variant.unit_price_measurement.reference_value != 1 -%}
+          {{- current_variant.unit_price_measurement.reference_value -}}
+          {%- endif -%}
+          {{ current_variant.unit_price_measurement.reference_unit }}
+        </span>
+        {%- endif -%}
+      </a>
+
+      {%- if settings.show_product_grid_buttons -%}
+      <a class="btn" href="{{ variant.url }}">{{ 'products.product.view_item' | t }}</a>
+      {%- endif -%}
+
+      {%- if settings.enable_yotpo and settings.yotpo_ID != '' -%}
+      <div class="yotpo--hidden">
+        {%- render 'yotpo-reviews', product: product -%}
+      </div>
+      {%- endif -%}
+    </div>
+  </div>
+</div>

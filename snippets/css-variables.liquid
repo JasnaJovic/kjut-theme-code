@@ -1,0 +1,173 @@
+{%- comment -%} Fonts {%- endcomment -%}
+{%- assign heading_font = settings.type_heading_font -%}
+{%- assign body_font = settings.type_body_font -%}
+{%- assign base_text_size = settings.base_text_size -%}
+{%- assign base_heading_size = settings.base_heading_size -%}
+
+{%- comment -%} Colors {%- endcomment -%}
+{%- assign color_body_text = settings.color_body_text -%}
+{%- if color_body_text == 'rgba(0,0,0,0)' -%}
+	{%- assign color_body_text = '#fff' -%}
+{%- endif -%}
+
+{%- assign color_accent = settings.color_accent -%}
+{%- assign color_accent_oposite = '#fff' -%}
+{%- assign color_accent_brightness = color_accent | color_brightness | round -%}
+{%- if color_accent_brightness > 204 -%}
+	{%- assign color_accent_oposite = '#000' -%}
+{%- endif -%}
+
+{%- assign color_bg_body = settings.color_body_bg -%}
+{%- assign color_bg_body_brightness = color_bg_body | color_brightness | round -%}
+{%- if color_bg_body_brightness > 153 -%}
+	{%- assign color_bg_body_lighten_darken = color_bg_body | color_darken: 10 -%}
+{%- else -%}
+	{%- assign color_bg_body_lighten_darken = color_bg_body | color_lighten: 10 -%}
+{%- endif -%}
+
+{%- assign color_text_heading_darken = settings.color_headings | color_darken: 10 -%}
+{%- assign color_bg_body_darken = settings.color_body_bg | color_darken: 10 -%}
+
+{%- comment -%} Button colors {%- endcomment -%}
+{%- assign color_button_primary_bg = settings.color_button_primary -%}
+{%- assign color_button_primary_text = '#fff' -%}
+{%- assign color_button_primary_brightness = color_button_primary_bg | color_brightness | round -%}
+{%- if color_button_primary_brightness > 215 -%}
+	{%- assign color_button_primary_text = '#000' -%}
+{%- endif -%}
+
+{%- assign color_button_secondary_bg = settings.color_button_secondary -%}
+{%- assign color_button_secondary_text = '#fff' -%}
+{%- assign color_button_secondary_brightness = color_button_secondary_bg | color_brightness | round -%}
+{%- if color_button_secondary_brightness > 215 -%}
+	{%- assign color_button_secondary_text = '#000' -%}
+{%- endif -%}
+
+{%- comment -%} Product grid image size {%- endcomment -%}
+{%- assign image_size = settings.image_size -%}
+
+{%- style -%}
+	:root {
+		--color-button-primary-bg: {{ color_button_primary_bg }};
+		--color-button-primary-bg-alpha-50: {{ color_button_primary_bg | color_modify: 'alpha', 0.50 }};
+		--color-button-primary-text: {{ color_button_primary_text }};
+		--color-button-primary-text-alpha-50: {{ color_button_primary_text | color_modify: 'alpha', 0.50 }};
+
+		--color-button-secondary-bg: {{ color_button_secondary_bg }};
+		--color-button-secondary-text:{{ color_button_secondary_text }};
+		--color-button-secondary-text-alpha-50: {{ color_button_primary_text | color_modify: 'alpha', 0.50 }};
+
+		--color-primary-darken: {{ color_body_text | color_darken: 20 }};
+		--color-text-body: {{ color_body_text }};
+		--color-text-heading: {{ settings.color_headings }};
+		--color-text-light: {{ color_body_text | color_lighen: 20  }};
+		--color-bg-body: {{ color_bg_body }};
+		--color-bg-body-overlay: {{ color_bg_body | color_modify: 'alpha', 0.75 }};
+		--color-drawer-border: {{ color_bg_body | color_darken: 5 }};
+		--color-bg-body-darken: {{ color_bg_body | color_darken: 10 }};
+		--color-bg-body-lighten-darken: {{ color_bg_body_lighten_darken }};
+		--color-accent: {{ settings.color_accent }};
+		--color-accent-opposite: {{ color_accent_oposite }};
+		--color-border: {{ settings.color_borders_and_lines }};
+		--color-border-alpha-50: {{ settings.color_borders_and_lines | color_modify: 'alpha', 0.50}};
+		--button-border-radius: {{ settings.button_border_radius }}px;
+		--base-text-size: {{ base_text_size }}px;
+		--subheading-text-size: {{ base_text_size | times: 0.857 | round }}px;
+		--h1-text-size: {{ base_heading_size | times: 2.571 | round }}px;
+		--h2-text-size: {{ base_heading_size | times: 2 }}px;
+		--h3-text-size: {{ base_heading_size | times: 1.571 | round }}px;
+		--h4-text-size: {{ base_heading_size | times: 1.428 | round }}px;
+		--h5-text-size: {{ base_heading_size | times: 1.142 | round }}px;
+		--h6-text-size: {{ base_heading_size }}px;
+		--disabled-grey-darken: {{ '#f6f6f6' | color_darken: 20 }};
+
+		--body-font-weight: {{ body_font.weight | default: 400 }};
+		--body-font-weight-bold: {{ body_font_bold.weight | default: 600 }};
+
+		--heading-font-family: {{ heading_font.family }}, {{ heading_font.fallback_families }};
+		--heading-font-weight: {{ heading_font.weight | default: 400 }};
+		--heading-font-style: {{ heading_font.style }};
+
+		--body-font-family: {{ body_font.family }}, {{ body_font.fallback_families }};
+		--body-font-style: {{ body_font.style }};
+
+		--button-border-radius: {{ settings.button_border_radius }}px;
+		--button-border-radius-inner: {{ settings.button_border_radius | minus: 2 }}px;
+
+		--nav-search-result-width: {{ 100 | divided_by: settings.product_grid_columns_desktop }}%;
+
+		--product-media-padding-top: {{ settings.image_aspect_ratio | times: 100 | append: '%' }};
+		--product-media-background-size: {{ image_size | default: 'cover' }};
+
+		--color-bg-body-alpha-25: {{ color_bg_body | color_modify: 'alpha', 0.25 }};
+		--color-bg-body-alpha-35: {{ color_bg_body | color_modify: 'alpha', 0.35 }};
+		--color-bg-body-alpha-60: {{ color_bg_body | color_modify: 'alpha', 0.60 }};
+		--color-bg-body-alpha-65: {{ color_bg_body | color_modify: 'alpha', 0.65 }};
+		--color-bg-body-alpha-85: {{ color_bg_body | color_modify: 'alpha', 0.85 }};
+
+		--color-text-body-alpha-5: {{ color_body_text | color_modify: 'alpha', 0.05 }};
+		--color-text-body-alpha-8: {{ color_body_text | color_modify: 'alpha', 0.08 }};
+		--color-text-body-alpha-10: {{ color_body_text | color_modify: 'alpha', 0.10 }};
+		--color-text-body-alpha-16: {{ color_body_text | color_modify: 'alpha', 0.16 }};
+		--color-text-body-alpha-25: {{ color_body_text | color_modify: 'alpha', 0.25 }};
+		--color-text-body-alpha-55: {{ color_body_text | color_modify: 'alpha', 0.55 }};
+		--color-text-body-alpha-60: {{ color_body_text | color_modify: 'alpha', 0.60 }};
+
+		--main-heading-size: {{ base_heading_size | times: 3.428 }}px;
+		--main-heading-size-mobile: {{ base_heading_size | times: 2.1 }}px;
+		--main-subheading-size: {{ base_heading_size | times: 1.428 }}px;
+		--main-subheading-size-mobile: {{ base_heading_size | times: 1.142 }}px;
+		--disclosure-text-size: {{ base_text_size | times: 0.8 }}px;
+
+		--product-grid-item-title-size: {{ base_heading_size | times: 1.2 }}px;
+		--loading-svg: url( "{{ 'loading.svg' | asset_url }}" );
+		--icon-check: url("{{ 'icon-check.svg' | asset_url }}");
+		--icon-close: url( "{{ 'icon-close.svg' | asset_url }}" );
+		--cart-loading-overlay: {{ color_bg_body | color_modify: 'alpha', 0.85 }} url( "{{ 'loading.svg' | asset_url }}" ) no-repeat center center;
+
+	}
+
+	{{ heading_font | font_face: font_display: 'swap' }}
+	{{ body_font | font_face: font_display: 'swap' }}
+
+	{%- assign heading_font_bold = heading_font | font_modify: 'weight', 'bolder' -%}
+	{%- assign heading_font_italic = heading_font | font_modify: 'style', 'italic' -%}
+	{%- assign heading_font_bold_italic = heading_font_bold | font_modify: 'style', 'italic' -%}
+
+	{%- assign body_font_bold = body_font | font_modify: 'weight', 'bolder' -%}
+	{%- assign body_font_italic = body_font | font_modify: 'style', 'italic' -%}
+	{%- assign body_font_bold_italic = body_font_bold | font_modify: 'style', 'italic' -%}
+
+	{%- if heading_font_bold -%}
+		{{- heading_font_bold | font_face: font_display: 'swap' -}}
+	{%- endif -%}
+	{%- if heading_font_italic -%}
+		{{- heading_font_italic | font_face: font_display: 'swap' -}}
+	{%- endif -%}
+	{%- if heading_font_bold_italic -%}
+		{{- heading_font_bold_italic | font_face: font_display: 'swap' -}}
+	{%- endif -%}
+
+	{%- if body_font_bold -%}
+		{{- body_font_bold | font_face: font_display: 'swap' -}}
+	{%- endif -%}
+	{%- if body_font_italic -%}
+		{{- body_font_italic | font_face: font_display: 'swap' -}}
+	{%- endif -%}
+	{%- if body_font_bold_italic -%}
+		{{- body_font_bold_italic | font_face: font_display: 'swap' -}}
+	{%- endif -%}
+
+	@font-face {
+		font-family: 'custom-icons';
+		src: url('{{ "custom-icons.eot?soxx27" | asset_url }}');
+		src: url('{{ "custom-icons.eot?soxx27" | asset_url }}#iefix') format('embedded-opentype'),
+			url('{{ "custom-icons.ttf?soxx27" | asset_url }}') format('truetype'),
+			url('{{ "custom-icons.woff?soxx27" | asset_url }}') format('woff'),
+			url('{{ "custom-icons.svg?soxx27" | asset_url }}#custom-icons') format('svg');
+		font-weight: normal;
+		font-style: normal;
+		font-display: block;
+	}
+
+{%- endstyle -%}

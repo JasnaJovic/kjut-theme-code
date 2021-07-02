@@ -1,0 +1,16 @@
+{%- if settings.product_badge_style == 'circle' -%}
+	{%- assign soldout = 'products.product.sold_out_html' | t | replace: ' ', '<br>' -%}
+	{%- if badge -%}
+		{%- assign badge = badge | replace: ' ', '<br>' -%}
+	{%- endif -%}
+{%- else -%}
+	{%- assign soldout = 'products.product.sold_out_html' | t -%}
+{%- endif -%}
+
+{%- if sold_out -%}
+	<div class="tag tag--{{ settings.product_badge_style }}"><span>{{ soldout }}</span></div>
+{%- elsif on_sale -%}
+	<div class="tag tag--{{ settings.product_badge_style }}"><span>{{ 'products.product.on_sale_html' | t }}</span></div>
+{%- elsif badge -%}
+	<div class="tag tag--{{ settings.product_badge_style }}"><span>{{ badge }}</span></div>
+{%- endif -%}

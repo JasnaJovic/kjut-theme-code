@@ -1,0 +1,300 @@
+{%- comment -%} /snippets/product-grid-item.liquid {%- endcomment -%}
+
+{%- comment -%}
+	Logic to set the grid size
+{%- endcomment -%}
+{%- comment -%}
+  Logic to set the grid size
+{%- endcomment -%}
+
+{%- assign num_rows = settings.product_grid_columns_desktop | plus: 0 -%}
+{%- if num_rows > total_product_count -%}
+	{%- assign num_rows = total_product_count -%}
+
+    {%- if num_rows == 1 -%}
+      {%- assign grid_item_width = 'medium--one-whole large--one-whole small--whole' -%}
+    {%- elsif num_rows == 2 -%}
+      {%- assign grid_item_width = 'medium--one-half large--one-half small--one-half' -%}
+    {%- elsif num_rows == 3 -%}
+      {%- assign grid_item_width = 'medium--one-half large--one-third small--whole' -%}
+    {%- elsif num_rows == 4 -%}
+      {%- assign grid_item_width = 'medium--one-half large--one-quarter small--one-half' -%}
+    {%- endif -%}
+
+{% else %}
+    {%- if num_rows == 1 -%}
+    	{%- assign grid_item_width = 'medium--one-whole large--one-whole' -%}
+    {%- elsif num_rows == 2 -%}
+    	{%- assign grid_item_width = 'medium--one-half large--one-half' -%}
+    {%- elsif num_rows == 3 -%}
+    	{%- assign grid_item_width = 'medium--one-half large--one-third' -%}
+    {%- elsif num_rows == 4 -%}
+    	{%- assign grid_item_width = 'medium--one-half large--one-quarter' -%}
+    {%- endif -%}
+
+    {%- assign num_rows_mobile = settings.product_grid_columns_mobile | plus: 0 -%}
+    {%- if num_rows_mobile == 1 -%}
+    	{%- assign grid_item_width =  grid_item_width | append: ' small--whole' -%}
+    {%- elsif num_rows_mobile == 2 -%}
+    	{%- assign grid_item_width = grid_item_width | append: ' small--one-half' -%}
+    {%- endif -%}
+{% endif %}
+
+{%- assign tag = false -%}
+{%- if product.available -%}
+	{%- assign sold_out = false -%}
+{%- else -%}
+	{%- assign sold_out = true -%}
+	{%- assign tag = true -%}
+{%- endif -%}
+
+{%- if product.compare_at_price_min > product.price_min -%}
+	{%- if sold_out -%}
+		{%- assign on_sale = false -%}
+	{%- else -%}
+		{%- assign on_sale = true -%}
+		{%- assign tag = true -%}
+	{%- endif -%}
+{%- else -%}
+	{%- assign on_sale = false -%}
+{%- endif -%}
+
+{%- assign badge = false -%}
+{%- for tag in product.tags -%}
+	{%- if tag contains 'badge' -%}
+		{%- assign badge = tag | replace: 'badge_', '' -%}
+	{%- endif -%}
+{%- endfor -%}
+
+{%- assign current_variant = product.selected_or_first_available_variant -%}
+{%- assign featured_media = product.featured_media -%}
+
+<div class="text-center {{ grid_item_width }} {{ total_product_count }}{% if enable_carousel %} featured-collection__item{% endif %}{% if tag %} has-tag{% endif %}"
+	{% if enable_carousel %}
+		data-product-slide
+	{% endif %}
+	data-product-id="{{ product.id }}">
+	<div class="product-grid-item">
+		{%- comment -%} Image {%- endcomment -%}
+		<div class="product-grid-item__image">
+			{%- assign image = variant.image -%}
+			<a
+				href="{{ variant.url }}"
+				class="product__media product__media--featured {% unless remove_lazyload %}lazyload{% endunless %}"
+				data-bgset="{% render 'bgset', image: image %}"
+				data-sizes="auto"
+				data-parent-fit="{{ settings.image_size }}"
+				data-aspectratio="{{ image.aspect_ratio }}">
+				<span class="visually-hidden">{{ 'general.accessibility.slide_image' | t }}</span>
+			</a>
+
+			{% comment %}{%- render 'product-badge', on_sale: on_sale, sold_out: sold_out, badge: badge -%} {% endcomment %}
+
+			{%- if product_grid_slideshow and product.images.size > 1 -%}
+				<div class="product__media-slider product__media-slider--mobile product__media-slider--arrows-{{ settings.product_grid_slideshow_arrows }}">
+					{%- for media in product.media -%}
+						{%- assign image = media.preview_image -%}
+						<div class="product__media-slide">
+							<a href="{{ variant.url }}"
+								class="product__media {% unless remove_lazyload %}lazyload{% endunless %}"
+								data-bgset="{% render 'bgset', image: image %}"
+								data-sizes="auto"
+								data-parent-fit="{{ settings.image_size }}"
+								data-aspectratio="{{ image.aspect_ratio }}">
+							</a>
+
+							{% comment %} {%- render 'product-badge', on_sale: on_sale, sold_out: sold_out, badge: badge -%} {% endcomment %}
+						</div>
+					{%- endfor -%}
+				</div>
+
+				{%- if settings.product_grid_hover_image -%}
+					<div class="product__media-slider product__media-slider--desktop product__media-slider--arrows-{{ settings.product_grid_slideshow_arrows }}">
+						{%- for media in product.media -%}
+							{%- if media != featured_media -%}
+                      			{% if media.alt contains value %}
+								{%- assign image = media.preview_image -%}
+								<div class="product__media-slide">
+									<a href="{{ variant.url }}"
+										class="product__media {% unless remove_lazyload %}lazyload{% endunless %}"
+										data-bgset="{% render 'bgset', image: image %}"
+										data-sizes="auto"
+										data-parent-fit="{{ settings.image_size }}"
+										data-aspectratio="{{ image.aspect_ratio }}">
+									</a>
+
+									{% comment %}{%- render 'product-badge', on_sale: on_sale, sold_out: sold_out, badge: badge -%}{% endcomment %}
+								</div>
+                      			{%- endif -%}
+							{%- endif -%}
+						{%- endfor -%}
+					</div>
+				{%- else -%}
+					<div class="product__media-slider product__media-slider--no-hover product__media-slider--desktop product__media-slider--arrows-{{ settings.product_grid_slideshow_arrows }}">
+						{%- for media in product.media -%}
+							{%- assign image = media.preview_image -%}
+							<div class="product__media-slide">
+								<a href="{{ product.url }}"
+									class="product__media {% unless remove_lazyload %}lazyload{% endunless %}"
+									data-bgset="{% render 'bgset', image: image %}"
+									data-sizes="auto"
+									data-parent-fit="{{ settings.image_size }}"
+									data-aspectratio="{{ image.aspect_ratio }}">
+								</a>
+
+								{% comment %}{%- render 'product-badge', on_sale: on_sale, sold_out: sold_out, badge: badge -%}{% endcomment %}
+							</div>
+						{%- endfor -%}
+					</div>
+				{%- endif -%}
+
+			{%- else -%}
+				{%- if product.media[1].preview_image != blank and settings.product_grid_hover_image -%}
+          			{% assign text = value | append: '2' | handle %}
+          			{%- for media in product.media -%}
+                    {% if media.alt contains text %}
+                    {%- assign image = media -%}
+          			{%- endif -%}
+          			{%- endfor -%}
+					<a class="product__media-hover" href="{{ variant.url }}">
+						<span class="product__media-hover-img product__media {% unless remove_lazyload %}lazyload{% endunless %}"
+							data-bgset="{% render 'bgset', image: image %}"
+							data-sizes="auto"
+							data-parent-fit="{{ settings.image_size }}"
+							data-aspectratio="{{ image.preview_image.aspect_ratio }}">
+						</span>
+
+						{% comment %}{%- render 'product-badge', on_sale: on_sale, sold_out: sold_out, badge: badge -%}{% endcomment %}
+					</a>
+          
+				{%- endif -%}
+			{%- endif -%}
+
+			<noscript>
+				<div class="product__media" style="background-image: url('{{ image | img_url: '600x' }}')"></div>
+
+				{%- if product.media[1].preview_image != blank and settings.product_grid_hover_image -%}
+					<a class="product__media-hover" href="{{ product.url }}">
+						<span class="product__media-hover-img product__media" style="background-image: url('{{ image | img_url: '600x' }}')"></span>
+
+						{% comment %}{%- render 'product-badge', on_sale: on_sale, sold_out: sold_out, badge: badge -%}{% endcomment %}
+					</a>
+				{%- endif -%}
+			</noscript>
+
+			{%- unless settings.quick_button == 'none' -%}
+				<div class="btn-wrapper">
+					{%- if settings.quick_button == 'view' -%}
+						<a href="{{ product.url | within: collection }}" class="btn btn--quick-view quick_view_button">{{ 'products.general.quick_view' | t }}</a>
+					{%- elsif settings.quick_button == 'buy' -%}
+						{%- form 'product', product -%}
+							<input type="hidden" name="quantity" value="1">
+							<input type="hidden" name="id" data-productid="{{ product.id }}" value="{{ current_variant.id }}">
+							<button type="submit" name="add" class="btn btn--quick-buy" data-quick-buy>
+								<span>{{ 'products.general.add_to_cart' | t }}</span>
+								{%- render 'icon-loading' -%}
+							</button>
+						{%- endform -%}
+					{%- endif -%}
+				</div>
+			{%- endunless -%}
+		</div>
+
+		{% comment %} Product info {% endcomment %}
+		<div class="product-grid-item__info">
+			{% comment %} Title {% endcomment %}
+			<a class="product-grid-item__title" href="{{ variant.url }}">
+              {{- product.title | escape -}} <span> {{ value }}</span>
+			</a>
+<div style="text-align: center">
+    <div class="yotpo bottomLine" style="display:inline-block"
+       data-product-id="{{ product.id }}">
+    </div>
+</div>
+			{%- if show_review_stars -%}
+				{%- if enable_reviews or settings.enable_yotpo and settings.yotpo_ID != '' -%}
+					{%- if settings.enable_yotpo and settings.yotpo_ID != '' -%}
+						<div class="product__badge product__badge--yotpo">
+							<div class="yotpo bottomLine" data-product-id="{{ product.id }}"></div>
+						</div>
+					{%- elsif enable_reviews -%}
+						<div class="product__badge">
+							<span class="shopify-product-reviews-badge" data-id="{{ product.id }}"></span>
+						</div>
+					{%- endif -%}
+				{%- endif -%}
+			{%- endif -%}
+
+			{% comment %} Price {% endcomment %}
+			<a class="product-grid-item__price price" href="{{ product.url | within: collection }}">
+				{% if on_sale == true %}
+					{{ product.price | money }}
+					<s>{{ product.compare_at_price | money }}</s>
+				{% elsif product.price_varies %}
+					{{ product.price_min | money }} - {{ product.price_max | money }}
+				{% else %}
+					{{ product.price | money }}
+				{% endif %}
+
+				{%- if current_variant.unit_price_measurement -%}
+					<span class="product-unit-price">
+						{{ current_variant.unit_price | money }}
+						{%- if current_variant.unit_price_measurement.reference_value != 1 -%}
+							{{- current_variant.unit_price_measurement.reference_value -}}
+						{%- endif -%}
+						{{ current_variant.unit_price_measurement.reference_unit }}
+					</span>
+				{%- endif -%}
+			</a>
+
+			{%- if settings.show_product_grid_buttons -%}
+				<a class="btn" href="{{ product.url | within: collection }}">{{ 'products.product.view_item' | t }}</a>
+			{%- endif -%}
+
+			{%- if enable_swatches -%}
+				{%- comment -%} /partials/product-swatch--grid.liquid {%- endcomment -%}
+
+{%- assign file_extension = 'png' -%}
+{%- unless product.has_only_default_variant -%}
+	<div class="product-grid-item__swatch {% if settings.product_grid_hover_swatches %}product-grid-item__swatch--hover{% endif %}">
+
+		{%- for option in product.options_with_values -%}
+			{%- assign color_label = 'color,colour,couleur,colore,farbe,색,色,färg,farve' | split: ',' -%}
+			{%- assign downcased_option = option.name | downcase -%}
+
+			{%- if color_label contains downcased_option -%}
+				{%- assign option_index = forloop.index0 -%}
+				<div class="swatch">
+					{%- for value in option.values -%}
+						<div data-value="{{ value | escape }}" class="swatch__element">
+							<div class="swatch__label">
+								<span class="swatch__color swatch__color--{{ value | handle }}" style="background-color: {{ value | split: ' ' | last | handle }}; background-image: url({{ value | handle | append: '.' | append: file_extension | asset_url }})"></span>
+							</div>
+
+							{%- assign link_found = false -%}
+							{%- for variant in product.variants -%}
+								{%- if variant.options[option_index] == value -%}
+									{%- unless link_found -%}
+										<a href="{{ variant.url }}" class="swatch__link">{{ value }}</a>
+										{%- assign link_found = true -%}
+									{%- endunless -%}
+								{%- endif -%}
+							{%- endfor -%}
+						</div>
+					{%- endfor -%}
+				</div>
+			{%- endif -%}
+		{%- endfor -%}
+
+	</div>
+{%- endunless -%}
+			{%- endif -%}
+
+			{%- if settings.enable_yotpo and settings.yotpo_ID != '' -%}
+				<div class="yotpo--hidden">
+					{%- render 'yotpo-reviews', product: product -%}
+				</div>
+			{%- endif -%}
+		</div>
+	</div>
+</div>

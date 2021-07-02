@@ -1,0 +1,52 @@
+<style>.banner--{{ section_id }}::after { opacity: {{ overlay_opacity }}; }</style>
+
+<div class="banner-inner banner--{{ height }} banner--text-{{ text_position }} {{ text_color }} banner--{{ section_id }} js-section-container">
+	{%- if image != blank -%}
+		<div class="{% if height == 'original-height' %}banner-img--original{% else %}banner-img{% endif %} lazyload"
+			data-bgset="{% render 'bgset', image: image %}"
+			data-sizes="auto"
+			data-parent-fit="cover"
+			{% if height == 'original-height' %}
+			style="padding-top: {{ 1 | divided_by: image.aspect_ratio | times: 100 | round: 1 }}%;"
+			{% endif %}
+		>
+		</div>
+		<noscript>
+			{%- if height == 'original-height' -%}
+				<div class="banner-img--original" style="background-image: url('{{ image | img_url: '1024x' }}'); padding-top: {{ 1 | divided_by: image.aspect_ratio | times: 100 | round: 1 }}%;"></div>
+			{%- else -%}
+				<div class="banner-img" style="background-image: url('{{ image | img_url: '1024x' }}');"></div>
+			{%- endif -%}
+		</noscript>
+	{%- else -%}
+		{%- if height == 'original-height' -%}
+			<div class="banner-img--original banner-img--placeholder">
+				{{- 'image' | placeholder_svg_tag: 'placeholder-svg-filled' -}}
+			</div>
+		{%- else -%}
+			<div class="banner-img banner-img--placeholder">
+				{{- 'image' | placeholder_svg_tag: 'placeholder-svg-filled' -}}
+			</div>
+		{%- endif -%}
+	{%- endif -%}
+
+	<div class="banner-content">
+		<header class="collection-header js-section-content">
+			<div class="wrapper wrapper--small {% if show_banner == false and template == 'collection' %}text-center{% endif %}">
+				<div class="banner-content__wrap">
+					{%- if subheading != blank -%}
+						<div class="section-header__subheading collection-subheading">{{ subheading }}</div>
+					{%- endif -%}
+
+					{%- unless heading == blank -%}
+						<h1 class="section-header__title collection-title">{{ heading }}</h1>
+					{%- endunless -%}
+
+					{%- unless text == blank -%}
+						<div class="rte rte--header collection-description">{{ text }}</div>
+					{%- endunless -%}
+				</div>
+			</div>
+		</header>
+	</div>
+</div>

@@ -1,0 +1,109 @@
+{%- if enable_tabs_h6 -%}
+	{%- assign tabs_h6 = "" -%}
+
+	{%- assign product_description_split = product.description | replace: '<p>[split]</p>', '[split]' | replace: '[split]', '' | replace: '<h6></h6>', '' -%}
+	{%- assign product_description_split = product_description_split | replace: '<h6>', '[!ヽ(´ー｀)/!]' |  replace: '</h6>', '[!ヽ(´ー｀)/!]' | split: '[!ヽ(´ー｀)/!]' -%}
+
+	{%- for item in product_description_split -%}
+		{%- comment -%}
+			The zero item is the product description, after that tab headings are odd and contents are even.
+		{%- endcomment -%}
+		{%- assign odd_mod = forloop.index0 | modulo: 2 -%}
+		{%- if odd_mod == 0 -%}
+			{%- unless forloop.index0 == 0 -%}
+			{%- assign tab_contents = tab_contents | append: item | append: '[!ヽ(´ー｀)/!]' -%}
+			{%- endunless -%}
+		{%- endif -%}
+		{%- if odd_mod == 1 -%}
+			{%- assign tab_headings = tab_headings | append: item | append: '[!ヽ(´ー｀)/!]' -%}
+		{%- endif -%}
+	{%- endfor -%}
+
+	{%- assign tab_headings = tab_headings | split: '[!ヽ(´ー｀)/!]' -%}
+	{%- assign tab_contents = tab_contents | split: '[!ヽ(´ー｀)/!]' -%}
+	{%- assign tabs_count = tab_headings.size | minus: 1 -%}
+
+	{%- capture tabs_h6 -%}
+		{%- for i in (0..tabs_count) -%}
+			<div class="product-tab">
+				<button class="product-tab__title" aria-controls="ProductTab--{{ tab_headings[i] | handle }}-{{ forloop.index0 }}" data-collapsible-trigger>
+					{{- tab_headings[i] -}}
+					{%- render 'icon-plus-minus' -%}
+				</button>
+				<div class="product-tab__content" id="ProductTab--{{ tab_headings[i] | handle }}-{{ forloop.index0 }}" data-collapsible-container>
+					<div class="product-tab__inner rte" data-collapsible-content>
+						{{- tab_contents[i] -}}
+					</div>
+				</div>
+			</div>
+		{%- endfor -%}
+	{%- endcapture -%}
+{%- endif -%}
+
+{%- if tabs_h6 != blank or tab_1 != blank or tab_2 != blank or tab_3 != blank or enable_reviews or settings.enable_yotpo and settings.yotpo_ID != '' -%}
+	<div class="product-tabs js-product-tabs">
+		{%- if enable_reviews or settings.enable_yotpo and settings.yotpo_ID != '' -%}
+			<div class="product-tab" id="ProductTab--reviews-container">
+				<button class="product-tab__title" aria-controls="ProductTab--reviews" data-collapsible-trigger>
+					{{- 'products.general.reviews' | t -}}
+					{%- render 'icon-plus-minus' -%}
+				</button>
+				<div class="product-tab__content" id="ProductTab--reviews" data-collapsible-container>
+					<div class="product-tab__inner" data-collapsible-content>
+						<div class="product__reviews" id="reviews-scroll">
+							{%- if settings.enable_yotpo and settings.yotpo_ID != '' -%}
+								{% render 'yotpo-reviews', product: product %}
+							{%- elsif enable_reviews -%}
+								<div id="shopify-product-reviews" data-id="{{ product.id }}">{{ product.metafields.spr.reviews }}</div>
+							{%- endif -%}
+						</div>
+					</div>
+				</div>
+			</div>
+		{%- endif -%}
+
+		{%- if tabs_h6 != blank -%}
+			{{- tabs_h6 -}}
+		{%- endif -%}
+
+		{%- if tab_1 != blank -%}
+			<div class="product-tab">
+				<button class="product-tab__title" aria-controls="ProductTab--page-{{ pages[tab_1].title | handle }}-1" data-collapsible-trigger>
+					{{- pages[tab_1].title -}}
+					{%- render 'icon-plus-minus' -%}
+				</button>
+				<div class="product-tab__content" id="ProductTab--page-{{ pages[tab_1].title | handle }}-1" data-collapsible-container>
+					<div class="product-tab__inner rte" data-collapsible-content>
+						{{- pages[tab_1].content -}}
+					</div>
+				</div>
+			</div>
+		{%- endif -%}
+		{%- if tab_2 != blank -%}
+			<div class="product-tab">
+				<button class="product-tab__title" aria-controls="ProductTab--page-{{ pages[tab_2].title | handle }}-2" data-collapsible-trigger>
+					{{- pages[tab_2].title -}}
+					{%- render 'icon-plus-minus' -%}
+				</button>
+				<div class="product-tab__content" id="ProductTab--page-{{ pages[tab_2].title | handle }}-2" data-collapsible-container>
+					<div class="product-tab__inner rte" data-collapsible-content>
+						{{- pages[tab_2].content -}}
+					</div>
+				</div>
+			</div>
+		{%- endif -%}
+		{%- if tab_3 != blank -%}
+			<div class="product-tab">
+				<button class="product-tab__title" aria-controls="ProductTab--page-{{ pages[tab_3].title | handle }}-3" data-collapsible-trigger>
+					{{- pages[tab_3].title -}}
+					{%- render 'icon-plus-minus' -%}
+				</button>
+				<div class="product-tab__content" id="ProductTab--page-{{ pages[tab_3].title | handle }}-3" data-collapsible-container>
+					<div class="product-tab__inner rte" data-collapsible-content>
+						{{- pages[tab_3].content -}}
+					</div>
+				</div>
+			</div>
+		{%- endif -%}
+	</div>
+{%- endif -%}

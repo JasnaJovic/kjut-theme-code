@@ -1,0 +1,234 @@
+{%- comment -%}
+	Blank single product state
+{%- endcomment -%}
+
+{%- assign file_extension = 'png' -%}
+{%- assign enable_variant_boxes = settings.enable_variant_boxes -%}
+
+{%- if layout == 'one-column' -%}
+	<div class = "grid__item large--one-quarter medium-down--hide"></div>
+{%- endif -%}
+
+<!-- Product Photos -->
+<div class="grid__item text-center large--one-half{% if layout == 'one-column' %} medium-down--one-whole{% endif %} product-single__media-wrapper product-single__media-wrapper--no-thumbs">
+	<div id="ProductPhoto--{{ section.id }}">
+		<div class="product-single__media-slider" >
+			<div class="product-single__media-slide">
+				<div class="product-single__media product-single__media--onboarding">
+					{{- 'product-5' | placeholder_svg_tag: 'placeholder-svg' -}}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Product Description -->
+<div class="grid__item{% if layout == 'one-column' %} text-center{% else %} large--one-half{% endif %}">
+	<div class="product-description-wrapper">
+		<div class="product-form__wrapper">
+			<div class="product-form product-form--onboarding">
+				{%- if section.settings.show_vendor -%}
+					<p class="product-vendor">{{ 'homepage.onboarding.vendor' | t }}</p>
+				{%- endif -%}
+
+				<h1 class="featured-product-title product-title">
+					<a href="#!">{{ 'homepage.onboarding.product_title' | t }}</a>
+				</h1>
+
+				{%- if enable_reviews or settings.enable_yotpo and settings.yotpo_ID != '' -%}
+					<div class="product__badge">
+						<span class="spr-badge" data-rating="0.0">
+							<span class="spr-starrating spr-badge-starrating">
+								{%- for i in (1..5) -%}
+									<i class="spr-icon spr-icon-star-empty"></i>
+								{%- endfor -%}
+							</span>
+						</span>
+					</div>
+				{%- endif -%}
+
+				<p class="product-price">
+					<span id="ProductPrice">{{ 1999 | money }}</span>
+				</p>
+
+				<div class="variants-wrapper">
+					{%- if enable_variant_boxes -%}
+						{%- if enable_swatches -%}
+							<div class="variant-wrapper variant-wrapper--color">
+	<label class="variant-label--color" for="SingleOptionSelector-{{ forloop.index0 }}-{{ section.id }}">
+		{{- 'homepage.onboarding.color' | t -}}
+	</label>
+
+	<fieldset
+		id="SingleOptionSelector-{{ forloop.index0 }}-{{ section.id }}"
+		class="variant-input-wrap"
+		data-index="option0">
+		<div class="swatch">
+			{%- for i in (1..3) -%}
+				{%- capture value -%}{%- cycle 'white', 'grey', 'black' -%}{%- endcapture -%}
+				<div data-value="{{ value | capitalize }}" class="swatch__element">
+					<input
+						id="option-{{ value }}-{{ forloop.index0 }}-{{ section.id }}"
+						class="swatch__input"
+						type="radio"
+						name="color--{{ section.id }}"
+						value="{{ value | escape }}"
+						data-index="option0"
+						{% if forloop.index == 1 %}checked{% endif %}>
+					<label class="variant__button-label--color swatch__label" for="option-{{ value }}-{{ forloop.index0 }}-{{ section.id }}">
+						<span class="swatch__color swatch__color--{{ value }}" style="background-color: {{ value | split: ' ' | last | handle }}; background-image: url({{ value | append: '.' | append: file_extension | asset_url }})"></span>
+						<span class="visually-hidden">{{ value }}</span>
+					</label>
+				</div>
+			{%- endfor -%}
+		</div>
+	</fieldset>
+</div>
+						{%- else -%}
+							<div class="variant-wrapper">
+								<label class="variant-label" for="SingleOptionSelector-{{ section.id }}-0">
+									{{- 'homepage.onboarding.color' | t -}}
+								</label>
+
+								<fieldset
+									id="SingleOptionSelector-{{ section.id }}-0"
+									class="variant-input-wrap variant-input-wrap--boxes">
+									{%- for i in (1..3) -%}
+										{%- capture value -%}{%- cycle 'White', 'Grey', 'Black' -%}{%- endcapture -%}
+										<div class="variant-field">
+											<input
+												id="option-{{ forloop.index0 }}-{{ section.id }}-0"
+												class="visually-hidden variant-input"
+												type="radio"
+												name="color-{{ section.id }}"
+												value="{{ value | escape }}">
+											<label class="variant__button-label" for="option-{{ forloop.index0 }}-{{ section.id }}-0">
+												{{- value -}}
+											</label>
+										</div>
+									{%- endfor -%}
+								</fieldset>
+							</div>
+						{%- endif -%}
+
+						<div class="variant-wrapper">
+							<label class="variant-label" for="SingleOptionSelector-{{ section.id }}-0">
+								{{- 'homepage.onboarding.size' | t -}}
+							</label>
+
+							<fieldset
+								id="SingleOptionSelector-{{ section.id }}-0"
+								class="variant-input-wrap variant-input-wrap--boxes">
+								{%- for i in (1..3) -%}
+									{%- capture value -%}{%- cycle 'Small', 'Medium', 'Large' -%}{%- endcapture -%}
+									<div class="variant-field">
+										<input
+											id="option-{{ forloop.index0 }}-{{ section.id }}-1"
+											class="visually-hidden variant-input"
+											type="radio"
+											name="color-{{ section.id }}"
+											value="{{ value | escape }}">
+										<label class="variant__button-label" for="option-{{ forloop.index0 }}-{{ section.id }}-1">
+											{{- value -}}
+										</label>
+									</div>
+								{%- endfor -%}
+							</fieldset>
+						</div>
+					{%- else -%}
+						{%- if enable_swatches -%}
+							<div class="variant-wrapper variant-wrapper--color">
+	<label class="variant-label--color" for="SingleOptionSelector-{{ forloop.index0 }}-{{ section.id }}">
+		{{- 'homepage.onboarding.color' | t -}}
+	</label>
+
+	<fieldset
+		id="SingleOptionSelector-{{ forloop.index0 }}-{{ section.id }}"
+		class="variant-input-wrap"
+		data-index="option0">
+		<div class="swatch">
+			{%- for i in (1..3) -%}
+				{%- capture value -%}{%- cycle 'white', 'grey', 'black' -%}{%- endcapture -%}
+				<div data-value="{{ value | capitalize }}" class="swatch__element">
+					<input
+						id="option-{{ value }}-{{ forloop.index0 }}-{{ section.id }}"
+						class="swatch__input"
+						type="radio"
+						name="color--{{ section.id }}"
+						value="{{ value | escape }}"
+						data-index="option0"
+						{% if forloop.index == 1 %}checked{% endif %}>
+					<label class="variant__button-label--color swatch__label" for="option-{{ value }}-{{ forloop.index0 }}-{{ section.id }}">
+						<span class="swatch__color swatch__color--{{ value }}" style="background-color: {{ value | split: ' ' | last | handle }}; background-image: url({{ value | append: '.' | append: file_extension | asset_url }})"></span>
+						<span class="visually-hidden">{{ value }}</span>
+					</label>
+				</div>
+			{%- endfor -%}
+		</div>
+	</fieldset>
+</div>
+						{%- else -%}
+							<div class="selector-wrapper">
+								<label for="SingleOptionSelector--{{ section.id }}-0">
+									{{- 'homepage.onboarding.color' | t -}}
+								</label>
+
+								<select id="SingleOptionSelector--{{ section.id }}-0">
+									{%- for i in (1..3) -%}
+										{%- capture value -%}{%- cycle 'White', 'Grey', 'Black' -%}{%- endcapture -%}
+										<option value="{{ value | handle }}">{{ value }}</option>
+									{%- endfor -%}
+								</select>
+							</div>
+						{%- endif -%}
+
+						<div class="selector-wrapper">
+							<label for="SingleOptionSelector--{{ section.id }}-1">
+								{{- 'homepage.onboarding.size' | t -}}
+							</label>
+
+							<select id="SingleOptionSelector--{{ section.id }}-1">
+								{%- for i in (1..3) -%}
+									{%- capture value -%}{%- cycle 'Small', 'Medium', 'Large' -%}{%- endcapture -%}
+									<option value="{{ value | handle }}">{{ value }}</option>
+								{%- endfor -%}
+							</select>
+						</div>
+					{%- endif -%}
+
+					{%- unless section.settings.hide_quantity -%}
+						<div class="qtydiv">
+							<label for="OnboardingQuantity" class="quantity-selector">{{ 'products.product.quantity' | t }}</label>
+							<input type="text" id="OnboardingQuantity" name="quantity" value="1" min="1" class="quantity-selector quantity-input">
+						</div>
+					{%- endunless -%}
+				</div>
+
+				<button class="btn {% if enable_payment_button %}btn--secondary{% else %}btn--submit{% endif %}">
+					<span id="AddToCartText">{{ 'products.product.add_to_cart' | t }}</span>
+				</button>
+
+				{%- if enable_payment_button -%}
+					<div>
+						<div class="shopify-payment-button">
+							<button class="shopify-payment-button__button shopify-payment-button__button--unbranded">{{ 'products.product.buy_it_now' | t }}</button>
+						</div>
+					</div>
+				{%- endif -%}
+
+				<div class="product-description rte">
+					<p>{{ 'homepage.onboarding.single_product_description' | t }}</p>
+				</div>
+			</div>
+
+			{%- comment -%}
+				Social Icons
+			{%- endcomment -%}
+			<div class="featured-product-social-wrapper">
+				{%- if section.settings.enable_social_sharing_products -%}
+					{%- render 'social-sharing', product: product -%}
+				{%- endif -%}
+			</div>
+		</div>
+	</div>
+</div>

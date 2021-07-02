@@ -1,0 +1,50 @@
+<div class="nav-search" aria-expanded="false" data-nav-search>
+	<div class="nav-search__scroller" data-nav-search-scroller>
+		<div class="nav-search__container wrapper" data-nav-search-container>
+			<div class="nav-search__close-container">
+				<button class="nav-search__close" data-nav-search-close><span class="visually-hidden">
+					{{- 'general.accessibility.close_search_bar' | t -}}</span>
+					{%- render 'icon-close' -%}
+				</button>
+			</div>
+
+			<form action="{{ routes.search_url }}" method="get" class="search-form" role="search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" maxlength="250" data-nav-search-form>
+				<div class="nav-search__input-group">
+					<label for="search-field" class="visually-hidden">{{ 'general.accessibility.search-field' | t }}</label>
+					<input class="nav-search__input" name="q" type="search" id="search-field" placeholder="{{ 'general.search.placeholder' | t }}" value="" data-nav-search-input />
+					<input type="hidden" name="type" value="product" data-nav-search-type />
+					<button type="submit" class="nav-search__submit"><span class="visually-hidden">{{ 'general.accessibility.submit_search_request' | t }}</span>{% render 'icon-search' %}</button>
+				</div>
+			</form>
+
+			{%- assign popular_links = section.settings.menu_searches_list -%}
+			{%- unless popular_links == blank -%}
+				<div class="results-popular">
+					<p class="results-popular__title">{{ 'general.search.popular' | t }}</p>
+					<ul class="results-popular__links">
+						{%- for link in linklists[popular_links].links -%}
+							<li><a href="{{ link.url }}" data-popular-search-link>{{ link.title | escape }}</a></li>
+						{%- endfor -%}
+					</ul>
+				</div>
+			{%- endunless -%}
+
+			{%- if section.settings.show_search_links -%}
+				<div class="results-popular">
+					<p class="results-popular__title">{{ 'general.search.browse_categories' | t }}</p>
+					<ul class="results-popular__links">
+						{%- for collection in collections -%}
+							<li><a href="{{ collection.url }}" class="results-popular__link" data-popular-search-link>{{ collection.title }}</a></li>
+						{%- endfor -%}
+					</ul>
+				</div>
+			{%- endif -%}
+
+			<div id="search-results" class="results" data-nav-search-results></div>
+
+			{%- if settings.enable_infinity_scroll -%}
+				<div class="pagination__loading">{{ 'collections.pagination.loading' | t }}<span class="dots dots--animated"><span>.</span><span>.</span><span>.</span></span></div>
+			{%- endif -%}
+		</div>
+	</div>
+</div>

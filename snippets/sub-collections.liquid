@@ -1,0 +1,80 @@
+{%- assign sub_collections_found = 0 -%}
+{%- for link in linklists.main-menu.links -%}
+	{%- if link.active and link.links.size > 0 -%}
+		{%- capture sub_collections -%}
+			{%- for sub_link in link.links -%}
+
+				{%- assign link_parts = sub_link.url | split: '/' -%}
+				{%- assign sub_collection_handle = link_parts.last -%}
+				{%- assign sub_collection = collections[sub_collection_handle] -%}
+
+				{%- if sub_collection != blank and sub_collections_found < subcollections_per_row -%}
+					{%- assign sub_collections_found = sub_collections_found | plus: 1 -%}
+					{%- if sub_collection.image -%}
+						{%- assign sub_collection_image = sub_collection.image -%}
+					{%- elsif sub_collection.products.first and sub_collection.products.first.images != empty -%}
+						{%- assign sub_collection_image = sub_collection.products.first.featured_media.preview_image -%}
+					{%- else -%}
+						{%- assign sub_collection_image = blank -%}
+					{%- endif -%}
+
+					<div class="subcollection__item">
+						<a href="{{ sub_collection.url }}" class="subcollection__item-image lazyload" data-bgset="{% render 'bgset', image: sub_collection_image %}" data-sizes="auto" data-parent-fit="cover">
+							<h3 class="subcollection__item-title"><span>{{ sub_collection.title }}</span></h3>
+						</a>
+						<noscript>
+							<a href="{{ sub_collection.url }}" class="subcollection__item-image no-js-image" style="background-image: url({{ sub_collection_image | img_url: '1024x' }});">
+								<h3 class="subcollection__item-title"><span>{{ sub_collection.title }}</span></h3>
+							</a>
+						</noscript>
+					</div>
+				{%- endif -%}
+			{%- endfor -%}
+		{%- endcapture -%}
+	{%- endif -%}
+
+	{%- assign sub_collections_found = 0 -%}
+	{%- if link.child_active and link.links.size > 0 -%}
+		{%- capture sub_collections -%}
+			{%- for sub_link in link.links -%}
+				{%- if sub_link.active and sub_link.links.size > 0 -%}
+					{%- for sub_sub_link in sub_link.links -%}
+						{%- assign sub_link_parts = sub_sub_link.url | split: '/' -%}
+						{%- assign sub_collection_handle = sub_link_parts.last -%}
+						{%- assign sub_collection = collections[sub_collection_handle] -%}
+
+						{%- if sub_collection != blank and sub_collections_found < subcollections_per_row -%}
+							{%- assign sub_collections_found = sub_collections_found | plus: 1 -%}
+							{%- if sub_collection.image -%}
+								{%- assign sub_collection_image = sub_collection.image -%}
+							{%- elsif sub_collection.products.first and sub_collection.products.first.images != empty -%}
+								{%- assign sub_collection_image = sub_collection.products.first.featured_media.preview_image -%}
+							{%- else -%}
+								{%- assign sub_collection_image = blank -%}
+							{%- endif -%}
+
+							<div href="{{ sub_collection.url }}" class="subcollection__item">
+								<a href="{{ sub_collection.url }}" class="subcollection__item-image lazyload" data-bgset="{% render 'bgset', image: sub_collection_image %}" data-sizes="auto" data-parent-fit="cover">
+									<h3 class="subcollection__item-title"><span>{{ sub_collection.title }}</span></h3>
+								</a>
+								<noscript>
+									<a href="{{ sub_collection.url }}" class="subcollection__item-image no-js-image" style="background-image: url({{ sub_collection_image | img_url: '1024x' }});">
+										<h3 class="subcollection__item-title"><span>{{ sub_collection.title }}</span></h3>
+									</a>
+								</noscript>
+							</div>
+						{%- endif -%}
+					{%- endfor -%}
+				{%- endif -%}
+			{%- endfor -%}
+		{%- endcapture -%}
+	{%- endif -%}
+{%- endfor -%}
+
+{%- if sub_collections != blank -%}
+	<div class="subcollections subcollections--{{ subcollections_position }} subcollections--{{ settings.product_grid_layout }}">
+		<div class="subcollections__list subcollections__list--{{ subcollections_per_row }}">
+			{{- sub_collections -}}
+		</div>
+	</div>
+{%- endif -%}
