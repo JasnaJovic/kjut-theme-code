@@ -1,0 +1,436 @@
+{%- assign header_position = section.settings.header_position -%}
+{%- assign header_transparent = section.settings.header_transparent -%}
+{%- assign header_text_color = section.settings.header_text_color -%}
+{%- assign nav_position = section.settings.menu_position -%}
+
+{%- assign logo_width = section.settings.logo_max_width -%}
+{%- assign logo_height = 0 -%}
+{%- assign logo = section.settings.logo -%}
+{%- assign logo_not_home = section.settings.logo_not_home -%}
+
+{%- if logo -%}
+	{%- assign logo_aspect_ratio = logo.aspect_ratio -%}
+	{%- assign logo_height = logo_width | divided_by: logo_aspect_ratio -%}
+	{%- assign logo_height_scrolled = logo_height -%}
+{%- endif -%}
+
+{%- if logo_not_home -%}
+	{%- assign logo_height_scrolled = logo_width | divided_by: logo_not_home.aspect_ratio -%}
+	{%- assign logo_aspect_ratio = logo_not_home.aspect_ratio -%}
+
+	{%- unless logo -%}
+		{%- assign logo_height = logo_width | divided_by: logo_aspect_ratio -%}
+	{%- endunless -%}
+{%- endif -%}
+
+{%- if logo_height_scrolled > 40 -%}
+	{%- assign logo_height_scrolled = 55 -%}
+{%- endif -%}
+
+{%- assign header_height = 60-%}
+{%- if logo_height > 30 -%}
+	{%- assign header_height = logo_height | plus: 30 -%}
+{%- endif -%}
+
+{%- render 'nav-drawer' -%}
+{%- render 'cart-drawer' -%}
+
+<header class="site-header site-header--{{ header_position }} site-header--nav-{{ nav_position }}{% if header_transparent %} site-header--transparent{% endif %} site-header--loading" role="banner"
+	data-section-id="{{ section.id }}"
+	data-height="{{ header_height }}"
+	data-section-type="header"
+	data-transparent="{{ header_transparent }}"
+	{% if header_transparent %}data-text-color="{{ header_text_color }}"{% endif %}
+	data-position="{{ header_position }}"
+	data-nav-position="{{ nav_position }}"
+	data-scroll-lock-fill-gap>
+	<div class="wrapper is-moved-by-drawer">
+		{%- if logo or logo_not_home -%}
+<style>
+	@media screen and (min-width: 768px) {
+		.logo__image-link { height: {{ logo_height | round | append: 'px' }}; }
+	}
+	.logo__image-link, .drawer__logo-image { width: {{ logo_width | append: 'px' }}; }
+	.has-scrolled .logo__image-link { width: {{ logo_height_scrolled | times: logo_aspect_ratio | round | append: 'px' }}; height: {{ logo_height_scrolled | round | append: 'px' }}; }
+</style>
+{%- endif -%}
+
+{%- capture logo_not_home -%}
+	{%- assign image = section.settings.logo_not_home -%}
+	{%- if image != blank -%}
+		<a href="{{ routes.root_url }}" aria-label="{{ shop.name }}" class="logo__image-link logo__image-link--other{% unless section.settings.logo %} logo__image-link--single{% endunless %}">
+			{%- assign image_url_pattern = image | img_url: '1x1' | replace: '_1x1.', '_{width}x.' -%}
+			{%- assign image_widths = "[50, 100, 150, 200, 250, 300, 350, 400, 500, 700, 800]" -%}
+			{%- assign logo_padding_top = 1 | divided_by: image.aspect_ratio | times: 100 | round: 1 -%}
+
+			<img
+				class="lazyload logo__image"
+				src="{{ 'blank.gif' | asset_img_url: '1x1' }}"
+				data-src="{{ image_url_pattern }}"
+				data-widths= "{{ image_widths }}"
+				data-aspectratio="{{ image.aspect_ratio }}"
+				data-sizes="auto"
+				loading="lazy"
+				width="{{ logo_width }}"
+				height="{{ logo_width | divided_by: image.aspect_ratio }}"
+				alt="{{ image.alt | escape }}">
+			<noscript>
+				<img src="{{ image | img_url: '1024x' }}" class="logo__image" alt="{{ image.alt | escape }}">
+			</noscript>
+			<span class="logo__image-push" style="padding-top: {{ logo_padding_top }}%"></span>
+		</a>
+	{%- endif -%}
+{%- endcapture -%}
+
+{%- capture logo_home -%}
+	{%- assign image = section.settings.logo -%}
+	{%- if image != blank -%}
+		<a href="{{ routes.root_url }}" aria-label="{{ shop.name }}" class="logo__image-link logo__image-link--home{% unless section.settings.logo_not_home %} logo__image-link--single{% endunless %}">
+			{%- assign image_url_pattern = image | img_url: '1x1' | replace: '_1x1.', '_{width}x.' -%}
+			{%- assign image_widths = "[50, 100, 150, 200, 250, 300, 350, 400, 500, 700, 800]" -%}
+			{%- assign logo_padding_top = 1 | divided_by: image.aspect_ratio | times: 100 | round: 1 -%}
+
+			<img
+				class="lazyload logo__image"
+				src="{{ 'blank.gif' | asset_img_url: '1x1' }}"
+				data-src="{{ image_url_pattern }}"
+				data-widths= "{{ image_widths }}"
+				data-aspectratio="{{ image.aspect_ratio }}"
+				data-sizes="auto"
+				loading="lazy"
+				width="{{ logo_width }}"
+				height="{{ logo_width | divided_by: image.aspect_ratio }}"
+				alt="{{ image.alt | escape }}">
+			<noscript>
+				<img src="{{ image | img_url: '1024x' }}" class="logo__image" alt="{{ image.alt | escape }}">
+			</noscript>
+			<span class="logo__image-push" style="padding-top: {{ logo_padding_top }}%"></span>
+		</a>
+	{%- endif -%}
+{%- endcapture -%}
+
+{%- if logo_not_home != blank or logo_home != blank or section.settings.show_shop_name -%}
+	<h1 class="logo">
+		{{- logo_not_home -}}
+		{{- logo_home -}}
+
+		{%- if section.settings.show_shop_name -%}
+			<a class="logo__text-link{% if logo_home != blank or logo_not_home != blank %} logo__text-link--has-image{% endif %}" href="{{ routes.root_url }}">{{ shop.name }}</a>
+		{%- endif -%}
+	</h1>
+{%- endif -%}
+		{%- render 'site-nav' -%}
+	</div>
+	<div class="space-maker"></div>
+
+	{%- if section.settings.show_search -%}
+		{%- render 'nav-search' -%}
+	{%- endif -%}
+</header>
+
+<script type="application/ld+json">
+{
+	"@context": "http://schema.org",
+	"@type": "Organization",
+	"name": {{ shop.name | json }},
+	{%- if section.settings.logo or section.settings.logo_not_home -%}
+		{%- if section.settings.logo -%}
+			{%- assign logo = section.settings.logo -%}
+		{%- elsif section.settings.logo_not_home -%}
+			{%- assign logo = section.settings.logo_not_home -%}
+		{%- endif -%}
+		{%- assign image_size = logo.width | append:'x' -%}
+
+		"logo": {{ logo | img_url: image_size | prepend: "https:" | json }},
+	{%- endif -%}
+	"sameAs": [
+		{{ settings.instagram_link | json }},
+		{{ settings.facebook_link | json }},
+		{{ settings.twitter_link | json }},
+		{{ settings.youtube_link | json }},
+		{{ settings.vimeo_link | json }},
+		{{ settings.pinterest_link | json }},
+		{{ settings.tumblr_link | json }}
+	],
+	"url": {{ shop.url | append: page.url | json }}
+}
+</script>
+
+{%- if template.name == 'index' -%}
+	{%- assign potential_action_target = shop.url | append: routes.search_url | append: "?q={search_term_string}" -%}
+	<script type="application/ld+json">
+		{
+			"@context": "http://schema.org",
+			"@type": "WebSite",
+			"name": {{ shop.name | json }},
+			"potentialAction": {
+				"@type": "SearchAction",
+				"target": {{ potential_action_target | json }},
+				"query-input": "required name=search_term_string"
+			},
+			"url": {{ shop.url | append: page.url | json }}
+		}
+	</script>
+{%- endif -%}
+
+{% schema %}
+{
+	"name": "Header",
+	"class": "header--sticky",
+	"settings": [
+		{
+			"type": "select",
+			"id": "header_position",
+			"label": "Position",
+			"default": "fixed",
+			"options": [
+				{
+					"value": "fixed",
+					"label": "Stick to top on scroll"
+				},
+				{
+					"value": "relative",
+					"label": "Hide on scroll"
+				}
+			]
+		},
+		{
+			"type": "checkbox",
+			"id": "header_transparent",
+			"label": "Enable transparent header",
+			"default": true,
+			"info": "If only the first section has fullscreen background image or video."
+		},
+		{
+			"type": "select",
+			"id": "header_text_color",
+			"label": "Text color",
+			"info": "For transparent header only",
+			"default": "white",
+			"options": [
+				{ "label": "White", "value": "white" },
+				{ "label": "Black", "value": "black" }
+			]
+		},
+		{
+			"type": "image_picker",
+			"id": "logo",
+			"label": "Custom logo (Transparent header)",
+			"info": "Used on Home and Collection pages when the header is transparent"
+		},
+		{
+			"type": "image_picker",
+			"id": "logo_not_home",
+			"label": "Custom logo (Default)",
+			"info": "Used on the other pages and on scroll when the header is sticky"
+		},
+		{
+			"type": "range",
+			"id": "logo_max_width",
+			"label": "Custom logo width (in pixels)",
+			"min": 30,
+			"max": 250,
+			"default": 100,
+			"step":10,
+			"unit":"px"
+		},
+		{
+			"type": "checkbox",
+			"id": "show_shop_name",
+			"label": "Show shop name"
+		},
+		{
+			"type": "header",
+			"content": "Search"
+		},
+		{
+			"type": "checkbox",
+			"id": "show_search",
+			"label": "Show search",
+			"default": true
+		},
+		{
+			"type": "link_list",
+			"id": "menu_searches_list",
+			"label": "Search menu",
+			"info": "This menu won't show dropdown items"
+		},
+		{
+			"type": "checkbox",
+			"id": "show_search_links",
+			"label": "Show collection links",
+			"default": true
+		},
+		{
+			"type": "header",
+			"content": "Menu"
+		},
+		{
+			"type": "link_list",
+			"id": "main-menu",
+			"label": "Link list",
+			"default": "main-menu"
+		},
+		{
+			"type": "select",
+			"id": "menu_position",
+			"label": "Position",
+			"default": "right",
+			"options": [
+				{ "label": "Right", "value": "right" },
+				{ "label": "Center", "value": "center" }
+			]
+		},
+		{
+			"type": "range",
+			"id": "image_aspect_ratio",
+			"label": "Image aspect ratio",
+			"info": "Affects mega menu and dropdown images",
+			"min": 0.5,
+			"max": 1.5,
+			"step": 0.1,
+			"unit": ":1",
+			"default": 1
+		}
+	],
+	"blocks": [
+		{
+			"name": "Mega menu",
+			"type": "megamenu",
+			"limit": 3,
+			"settings": [
+				{
+					"type": "text",
+					"id": "title",
+					"label": "Submenu item",
+					"info": "This submenu will appear as a megamenu."
+				},
+				{
+					"type": "select",
+					"id": "images_position",
+					"label": "Images position",
+					"default": "left",
+					"options": [
+						{ "label": "Left", "value": "left" },
+						{ "label": "Right", "value": "right"},
+						{ "label": "Stacked", "value": "stacked"}
+					]
+				},
+				{
+					"type": "header",
+					"content": "Image 1"
+				},
+				{
+					"type": "image_picker",
+					"id": "image_1",
+					"label": "Image",
+					"info": "Recommended size: 500 x 800 px"
+				},
+				{
+					"type": "text",
+					"id": "title_1",
+					"label": "Button text"
+				},
+				{
+					"type": "url",
+					"id": "link_1",
+					"label": "Link"
+				},
+				{
+					"type": "header",
+					"content": "Image 2"
+				},
+				{
+					"type": "image_picker",
+					"id": "image_2",
+					"label": "Image",
+					"info": "Recommended size: 500 x 800 px"
+				},
+				{
+					"type": "text",
+					"id": "title_2",
+					"label": "Button text"
+				},
+				{
+					"type": "url",
+					"id": "link_2",
+					"label": "Link"
+				},
+				{
+					"type": "header",
+					"content": "Image 3"
+				},
+				{
+					"type": "image_picker",
+					"id": "image_3",
+					"label": "Image",
+					"info": "Recommended size: 500 x 800 px"
+				},
+				{
+					"type": "text",
+					"id": "title_3",
+					"label": "Button text"
+				},
+				{
+					"type": "url",
+					"id": "link_3",
+					"label": "Link"
+				},
+				{
+					"type": "header",
+					"content": "Image 4"
+				},
+				{
+					"type": "image_picker",
+					"id": "image_4",
+					"label": "Image",
+					"info": "Recommended size: 500 x 800 px"
+				},
+				{
+					"type": "text",
+					"id": "title_4",
+					"label": "Button text"
+				},
+				{
+					"type": "url",
+					"id": "link_4",
+					"label": "Link"
+				}
+			]
+		},
+		{
+			"name": "Dropdown image",
+			"type": "dropdown_image",
+			"settings": [
+				{
+					"type": "text",
+					"id": "title",
+					"label": "Submenu item",
+					"info": "This submenu will appear as a dropdown with links and image."
+				},
+				{
+					"type": "image_picker",
+					"id": "image",
+					"label": "Image",
+					"info": "Recommended size: 500 x 800 px"
+				},
+				{
+					"type": "select",
+					"id": "image_position",
+					"label": "Image position",
+					"default": "left",
+					"options": [
+						{ "label": "Left", "value": "left" },
+						{ "label": "Right", "value": "right"}
+					]
+				},
+				{
+					"type": "url",
+					"id": "link",
+					"label": "Link"
+				}
+			]
+		}
+	]
+}
+{% endschema %}

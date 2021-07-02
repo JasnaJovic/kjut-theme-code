@@ -1,0 +1,111 @@
+<!-- /sections/featured-collection.liquid -->
+
+{%- assign products_columns = settings.product_grid_columns_desktop | plus: 0 -%}
+{%- assign products_rows = section.settings.products_rows | plus: 0 -%}
+{%- assign products_limit = products_columns | times: products_rows | plus: 0 -%}
+{%- assign enable_reviews = settings.enable_reviews -%}
+{%- assign enable_swatches = settings.color_swatches -%}
+{%- assign show_review_stars = settings.show_review_stars -%}
+{%- assign image_size = settings.image_size -%}
+{%- assign image_aspect_ratio = settings.image_aspect_ratio -%}
+{%- assign product_grid_slideshow = settings.product_grid_slideshow -%}
+{%- assign bg_color = section.settings.bg_color | default: '#fff' -%}
+
+{%- assign layout = section.settings.products_layout -%}
+{%- assign enable_carousel = false -%}
+{%- if layout == 'carousel' -%}
+	{%- assign enable_carousel = true -%}
+	{%- assign product_grid_slideshow = false -%}
+{%- endif -%}
+
+
+{% assign product_count = collection.all_products_count %}
+{% if product_count < products_limit %}
+{% assign total_product_count = product_count | plus: 0 %}
+{% else %}
+{% assign total_product_count = products_limit %}
+{% endif %}
+
+
+
+
+<section class="featured-collection-section text-center" id="featured-collection" data-section-id="{{ section.id }}" data-section-type="featured-collection" data-reviews="{{ enable_reviews }}" data-swatches="{{ enable_swatches }}" data-image-size="{{ image_size }}" data-image-aspectratio="{{ image_aspect_ratio }}" data-slider="{{ enable_carousel }}" data-product-columns="{{ products_columns }}" data-product-grid-slideshow="{{ product_grid_slideshow }}" style="background: {{ bg_color }};">
+	<div class="wrapper">
+		<div class="featured-collection__container">
+			<div class="featured-collection {% if enable_carousel %}featured-collection--slider js-featured-collection--slider{% else %}featured-collection--grid{% endif %}">
+                    {%- for block in section.blocks -%}
+                        {%- assign product = all_products[block.settings.chosen_product] -%}
+              			{% assign variant_found = false %}
+                        {%- for variant in product.variants -%}
+                            {%- if forloop.first == true -%}                             
+                              	{% assign first_of_size = variant.option2 %}                           
+                            {% endif %}
+                            {% assign variant_color = variant.option1 | handle %}
+                            {% if block.settings.product_variant == variant_color %}
+                              {%- if first_of_size == variant.option2 -%}
+                                  {%- if variant_found == false -%}     
+                                    {% assign variant_chosen = variant %}
+                                    {% assign variant_found = true %}
+                                  {% endif %}
+              				  {% endif %}
+              				{% endif %}
+                        {%- endfor -%}
+              
+                          {%- render 'product-grid-item-collections', 
+                                    variant: variant_chosen, 
+                          value: block.settings.product_variant, 
+                          product: product, 
+                          enable_swatches: enable_swatches, 
+                          enable_reviews: enable_reviews, 
+                          enable_carousel: enable_carousel,
+                          show_review_stars: show_review_stars, 
+                          product_grid_slideshow: product_grid_slideshow -%}
+                    {%- endfor -%}
+                          
+
+
+			</div>
+		</div>
+
+	</div>
+</section>
+
+{% schema %}
+{
+	"name": "Custom collection",
+	"settings": [
+		{
+			"type": "color",
+			"id": "bg_color",
+			"label": "Background",
+			"default": "#fff"
+		}
+	],
+	"blocks": [
+		{
+			"name": "Product",
+			"type": "Product",
+			"settings": [
+				{
+					"type": "product",
+					"id": "chosen_product",
+					"label": "Product"
+				},
+				{
+					"type": "text",
+					"id": "product_variant",
+					"label": "Product Color Variant",
+					"default": "sand",
+					"info": "Choose one of color variants (lowercase)"
+				}
+			]
+		}
+	],
+	"presets": [
+		{
+			"name": "Featured custom collection",
+			"category": "Collection"
+		}
+	]
+}
+{% endschema %}

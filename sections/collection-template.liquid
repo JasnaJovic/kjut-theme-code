@@ -1,0 +1,537 @@
+{%- comment -%} /sections/collection-template.liquid {%- endcomment -%}
+
+{%- assign collection_count = collection.all_products_count -%}
+{%- assign subcollections_position = section.settings.subcollections -%}
+{%- assign subcollections_per_row = section.settings.subcollections_per_row -%}
+{%- assign filter_mode = section.settings.filter_mode -%}
+{%- unless filter_mode == 'hidden' -%}
+	{%- assign enable_filters = true -%}
+{%- else -%}
+	{%- assign enable_filters = false -%}
+{%- endunless -%}
+{%- assign position_filters = section.settings.position_filters -%}
+{%- assign enable_sorting = section.settings.enable_collection_sorting -%}
+{%- assign enable_swatches = settings.color_swatches -%}
+{%- assign enable_reviews = settings.enable_reviews -%}
+{%- assign enable_infinity_scroll = settings.enable_infinity_scroll -%}
+{%- assign paginationLimit = settings.product_grid_columns_desktop | times: 12 -%}
+{%- assign show_review_stars = settings.show_review_stars -%}
+{%- assign image_size = settings.image_size -%}
+{%- assign image_aspect_ratio = settings.image_aspect_ratio -%}
+{%- assign product_grid_slideshow = settings.product_grid_slideshow -%}
+{%- assign product_grid_slideshow_arrows = settings.product_grid_slideshow_arrows -%}
+{%- assign collections_all = false -%}
+{%- assign show_banner_image = section.settings.show_image -%}
+
+{%- assign banner_image = collection.image -%}
+{%- if collection.handle == 'all' %}
+	{%- assign banner_image = section.settings.banner_image -%}
+{%- endif %}
+
+{%- if show_banner_image and banner_image -%}
+	{%- assign show_banner_image = true -%}
+{%- else -%}
+	{%- assign show_banner_image = false -%}
+{%- endif -%}
+
+{%- if collection.handle == 'all' -%}
+	{%- assign collections_all = true -%}
+{%- endif -%}
+
+{%- if enable_filters -%}
+	{%- comment -%}
+		Assign all selected tags to the container data attributes
+	{%- endcomment -%}
+	{%- assign selected_tags = '' -%}
+
+	{%- for tag in current_tags -%}
+		{%- assign current_tag_handle = tag | replace: '&#39;', '' | replace: '&#34;', '' | handle -%}
+		{%- assign selected_tags = selected_tags | append: current_tag_handle -%}
+		{%- unless forloop.last -%}
+			{%- assign selected_tags = selected_tags | append: '+' -%}
+		{%- endunless -%}
+	{%- endfor -%}
+
+{%- endif -%}
+
+<div
+	data-section-type="collection-template"
+	data-section-id="{{ section.id }}"
+	data-reviews="{{ enable_reviews }}"
+	data-image-size="{{ image_size }}"
+	data-image-aspectratio="{{ image_aspect_ratio }}"
+	data-swatches="{{ enable_swatches }}"
+	data-subcollections="{{ subcollections_position }}"
+	data-product-grid-slideshow="{{ product_grid_slideshow }}"
+	data-filters="{{ enable_filters }}"
+	data-filters-position="{{ position_filters }}"
+	data-collection="{{ collection.url | default: routes.all_products_collection_url }}"
+	data-tags='{% if selected_tags != blank %}{{ selected_tags | split: '+' | json }}{% else %}[]{% endif %}'
+	data-sort="{{ collection.sort_by | default: collection.default_sort_by }}"
+	data-filter-mode="{{ filter_mode }}"
+	{% unless show_banner_image %}data-prevent-transparent-header{% endunless %}>
+
+	{%- comment -%}
+		If there is a collection image, the split header is used.
+		Else, the plain, centered text header is used.
+	{%- endcomment -%}
+
+	{%- comment -%}
+		Collection header
+	{%- endcomment -%}
+
+	{%- capture collection_header -%}
+		{%- if show_banner_image -%}
+			{%- assign collectionHeaderClass = 'collection-header--has-image' -%}
+		{%- else -%}
+			{%- assign collectionHeaderClass = 'collection-header--no-image' -%}
+		{%- endif -%}
+
+		<header class="collection-header {{ collectionHeaderClass }}{% if show_banner_image %} {{ section.settings.text_color }}{% endif %}">
+			<div class="wrapper wrapper--small js-section-content">
+				{%- if collection.description != blank -%}
+					<h1 class="section-header__title collection-title">{{ collection.title | escape }}</h1>
+					<div class="rte rte--header collection-description">
+						{{- collection.description -}}
+					</div>
+				{%- else -%}
+					{%- if collection.handle == 'all' -%}
+						<h1 class="section-header__title collection-title">{{ 'products.general.catalog' | t }}</h1>
+					{%- else -%}
+						<h1 class="section-header__title collection-title">{{ collection.title }}</h1>
+					{%- endif -%}
+				{%- endif -%}
+			</div>
+		</header>
+	{%- endcapture -%}
+
+	{%- if show_banner_image -%}
+
+		{% comment %} Banner Settings {% endcomment %}
+		{%- assign banner_height = section.settings.banner_height -%}
+		{%- assign text_position = section.settings.text_position -%}
+		{%- assign overlay_opacity = section.settings.overlay_opacity | times: 0.01 | round: 2 -%}
+
+		<style>.banner-inner::after { opacity: {{ overlay_opacity }}; }</style>
+
+		<section class="banner">
+			<div class="banner-inner banner--{{ banner_height }} banner--text-{{ text_position }} js-section-container">
+
+				<div class="{% if banner_height == 'original-height' %}banner-img--original{% else %}banner-img{% endif %} lazyload"
+					data-bgset="{% render 'bgset', image: banner_image %}"
+					data-sizes="auto"
+					data-parent-fit="cover"
+					{% if banner_height == 'original-height' %}
+						style="padding-top: {{ 1 | divided_by: banner_image.aspect_ratio | times: 100 | round: 1 }}%;"
+					{% endif %}
+				>
+				</div>
+				<noscript>
+					{%- if banner_height == 'original-height' -%}
+						<div class="banner-img--original" style="background-image: url('{{ banner_image | img_url: '1024x' }}'); padding-top: {{ 1 | divided_by: banner_image.aspect_ratio | times: 100 | round: 1 }}%;"></div>
+					{%- else -%}
+						<div class="banner-img" style="background-image: url('{{ banner_image | img_url: '1024x' }}');"></div>
+					{%- endif -%}
+				</noscript>
+
+				<div class="banner-content">
+					{{- collection_header -}}
+				</div>
+			</div>
+		</section>
+
+	{%- else -%}
+		{%- assign bg_color = section.settings.bg_color | default: '#fafafa' -%}
+		<style>
+			body:not(.has-scrolled) .site-header:not(.is-megamenu-open),
+			.collection-header--no-image { background: {{ bg_color }}; }
+		</style>
+
+		<div class="js-section-container">
+			{{- collection_header -}}
+		</div>
+	{%- endif -%}
+
+
+	<div class="collection__wrapper">
+		{%- if enable_filters -%}
+			{%- assign file_extension = 'png' -%}
+{%- capture filter_tags -%}
+	{%- assign tags_list = '' -%}
+
+	{%- case filter_mode -%}
+		{%- when 'tag' -%}
+			{%- for tag in collection.all_tags -%}
+				{%- unless tags_list contains tag or tag contains 'badge' or tag contains '__tab' -%}
+					{%- capture temp_list -%}{{ tags_list | append: tag | append: ' ' }}{%- endcapture -%}
+					{%- assign tags_list = tempList -%}
+					<li class="collection__filter-tag collection__filter-tag--default {% if current_tags contains tag %}is-active{% endif %}">
+						<button data-tag="{{ tag | handleize }}" class="tag-button tag-button--{{ tag | handle }}">{{ tag }}</button>
+					</li>
+				{%- endunless -%}
+			{%- endfor -%}
+
+		{%- when 'group' -%}
+			{%- assign all_groups = '' -%}
+			{%- assign groups = '' -%}
+
+			{%- for tag in collection.all_tags -%}
+				{%- assign tag_parts = tag | split: '_' -%}
+
+				{%- if tag_parts.size == 2 -%}
+
+					{% unless all_groups contains tag_parts.first %}
+						{%- assign groups = groups | append: tag_parts.first | append: ',' -%}
+						{%- assign all_groups = all_groups | append: groups -%}
+					{%- endunless -%}
+
+				{%- endif -%}
+			{%- endfor -%}
+
+			{%- assign groups = groups | split: ',' | compact | uniq -%}
+			{%- assign color_label = 'color,colour,couleur,colore,farbe,색,色,färg,farve' | split: ',' -%}
+
+			{%- for group in groups -%}
+				{%- assign group_label = group | downcase -%}
+
+				{%- comment -%} Don't show "badge" as a filter {%- endcomment -%}
+				{%- unless group_label == 'badge' -%}
+
+					{%- if color_label contains group_label and settings.color_swatches -%}
+						{%- assign is_color_swatch = true -%}
+					{%- else -%}
+						{%- assign is_color_swatch = false -%}
+					{%- endif -%}
+
+					<div class="collection__filter">
+						<button type="button" class="collection__filter-title" aria-expanded="false" aria-controls="CollectionFilter--{{ group | handle }}-{{ forloop.index }}">
+							{{- group -}}
+						</button>
+
+						<ul class="collection__filter-tags{% if is_color_swatch %} collection__filter-tags--swatches{% endif %}" id="CollectionFilter--{{ group | handle }}-{{ forloop.index }}">
+							{%- for tag in collection.all_tags -%}
+								{%- assign tag_parts = tag | split: '_' -%}
+								{%- assign group_tag = tag_parts.last -%}
+
+								{%- if tag_parts.first == group -%}
+									{%- if is_color_swatch -%}
+										<li class="collection__filter-tag collection__filter-tag--swatch swatch{% if current_tags contains tag %} is-active{% endif %}">
+											<button
+												class="swatch__element tag-button tag-button--{{ group_tag | handle }}"
+												data-value="{{ group_tag }}"
+												data-tag="{{ tag | handleize }}">
+												<div class="swatch__label">
+													<span class="swatch__color swatch__color--{{ group_tag | handle }}" style="background-color: {{ group_tag | split: ' ' | last | handle }}; background-image: url({{ group_tag | handle | append: '.' | append: file_extension | asset_url }})"></span>
+													<span class="swatch__color-name">{{ group_tag }}</span>
+												</div>
+											</button>
+										</li>
+									{%- else -%}
+
+										{% comment %} Check if the tag value is a number {% endcomment %}
+										{%- capture tag_value -%}{{ group_tag | abs }}{%- endcapture -%}
+
+										{%- if tag_value == group_tag -%}
+											{%- assign is_number = true -%}
+										{%- else -%}
+											{%- assign is_number = false -%}
+										{%- endif -%}
+
+										<li class="collection__filter-tag {% if is_number %}collection__filter-tag--number{% else %}collection__filter-tag--default{% endif %}{% if current_tags contains tag %} is-active{% endif %}">
+											<button data-tag="{{ tag | handleize }}" class="tag-button tag-button--{{ group_tag | handle }}">{{ group_tag }}</button>
+										</li>
+									{%- endif -%}
+								{%- endif -%}
+							{%- endfor -%}
+						</ul>
+					</div>
+				{%- endunless -%}
+			{%- endfor -%}
+
+	{%- endcase -%}
+{%- endcapture -%}
+
+{%- if enable_filters and filter_tags != blank -%}
+	<div id="collection__filters" class="collection__filters collection__filters--{{ position_filters }}{% if current_tags != blank %} collection__filters--has-tags-selected{% endif %}">
+		<div class="collection__filters-wrapper">
+			<div class="wrapper">
+				<div class="collection__filters-list">
+
+					<div class="collection__filters-reset">
+						<button class="reset-filters{% if current_tags != blank %} is-visible{% endif %}" data-reset-filters>
+							{%- render 'icon-close' -%}
+							{{ 'products.general.reset' | t }}
+							<span class="products-found">- {{ 'collections.general.products_with_count' | t: count: collection.products_count }}</span>
+						</button>
+					</div>
+
+					{%- case filter_mode -%}
+						{%- when 'tag' -%}
+							<div class="collection__filter">
+								<button type="button" class="collection__filter-title" aria-expanded="false" aria-controls="CollectionFilter--{{ group | handle }}-{{ forloop.index }}">
+									{{- 'products.general.filters' | t -}}
+								</button>
+
+								<ul class="collection__filter-tags" id="CollectionFilter--{{ group | handle }}-{{ forloop.index }}">
+									{{- filter_tags -}}
+								</ul>
+							</div>
+
+						{%- when 'group' -%}
+							{{- filter_tags -}}
+
+					{%- endcase -%}
+				</div>
+			</div>
+		</div>
+	</div>
+{%- endif -%}
+		{%- endif -%}
+
+      <div class="collection__products wrapper">
+
+        {%- if subcollections_position == 'top' -%}
+        {%- render 'sub-collections',
+					subcollections_position: subcollections_position, subcollections_per_row: subcollections_per_row -%}
+        {%- endif -%}
+
+        {%- if section.settings.show_breadcrumbs -%}
+        {%- render 'breadcrumbs' -%}
+        {%- endif -%}
+
+        {%- if enable_sorting -%}
+        {%- render 'collection-sorting' -%}
+        {%- endif -%}
+
+        
+        <div class="collection__items product-grid--{{ settings.product_grid_layout }}"{% if enable_infinity_scroll %} id="AjaxinateLoop"{% endif %}>
+          {%- if collection_count > 0 -%}
+          {%- if collection.products_count > 0 -%}
+
+          {% comment %} Infinity scrolling {% endcomment %}
+          {%- for product in collection.products -%}
+          {%- if forloop.first == true -%}
+          {%- assign first_of_products = true -%}
+          {% else %}
+          {%- assign first_of_products = false -%}
+          {% endif %}
+          {%- assign product_title = product.title -%}
+          {%- for option in product.options_with_values -%}
+
+          {%- assign color_label = 'color,colour,couleur,colore,farbe,색,色,färg,farve' | split: ',' -%}
+          {%- assign downcased_option = option.name | downcase -%}
+
+          {%- if color_label contains downcased_option -%}
+          {%- assign option_index = forloop.index0 -%}
+          
+
+            {%- for variant in product.variants -%}
+                {%- if forloop.first == true -%}
+                {%- if first_of_products -%}
+                {% assign first_of_size = variant.option2 %}
+                {% endif %}
+                {% endif %}
+
+            		{%- assign variant_found = false -%}
+
+                {%- for value in option.values -%}
+                {%- if variant.options[option_index] == value -%}
+                {%- if first_of_size == variant.option2 -%}
+                {%- unless variant_found -%}
+          
+                {%- render 'product-grid-item-variant2', variant: variant, product_title: product_title, value: value, product: product, enable_swatches: enable_swatches, enable_reviews: enable_reviews, enable_carousel: enable_carousel,
+									show_review_stars: show_review_stars, product_grid_slideshow: product_grid_slideshow -%}
+
+                {%- assign variant_found = true -%}
+                {%- endunless -%}
+                {%- endif -%}
+                {%- endif -%}
+                {%- endfor -%}
+          
+          {%- endfor -%}
+          
+        {%- endif -%}
+        {%- endfor -%}
+        {%- endfor -%}
+          {%- endif -%}
+          {%- endif -%}
+    
+      </div>
+
+
+			
+		</div>
+	</div>
+</div>
+
+{% schema %}
+{
+	"name": "Collection pages",
+	"class": "collection-section transparent-header",
+	"settings": [
+		{
+			"type": "header",
+			"content": "Layout"
+		},
+		{
+			"type": "checkbox",
+			"id": "show_breadcrumbs",
+			"label": "Show breadcrumbs",
+			"default": true
+		},
+		{
+			"type": "header",
+			"content": "Subcollections"
+		},
+		{
+			"type": "select",
+			"label": "Show subcollections",
+			"id": "subcollections",
+			"default": "hidden",
+			"options": [
+				{ "label": "Top", "value": "top" },
+				{ "label": "Bottom", "value": "bottom" },
+				{ "label": "Hidden", "value": "hidden" }
+			]
+		},
+		{
+			"type": "range",
+			"id": "subcollections_per_row",
+			"label": "Items per row",
+			"step": 1,
+			"max": 5,
+			"min": 3,
+			"default": 3
+		},
+		{
+			"type": "header",
+			"content": "Filters and sorting"
+		},
+		{
+			"type": "checkbox",
+			"id": "enable_collection_sorting",
+			"label": "Enable collection sorting",
+			"default": true
+		},
+		{
+			"type": "select",
+			"label": "Filter mode",
+			"id": "filter_mode",
+			"info": "Filters by group requires specific tag formatting. [Learn more](https://palo-alto.helpscoutdocs.com/article/179-product-tag-and-group-filtering)",
+			"default": "tag",
+			"options": [
+				{ "label": "Hidden", "value": "hidden" },
+				{ "label": "By tag", "value": "tag" },
+				{ "label": "By group", "value": "group" }
+			]
+		},
+		{
+			"type": "select",
+			"id": "position_filters",
+			"label": "Position",
+			"default": "left",
+			"options": [
+				{ "label": "Top", "value": "top" },
+				{ "label": "Left", "value": "left" }
+			]
+		},
+		{
+			"type": "header",
+			"content": "Banner image"
+		},
+		{
+			"type": "checkbox",
+			"id": "show_image",
+			"label": "Show image",
+			"default": true
+		},
+		{
+			"type": "image_picker",
+			"id": "banner_image",
+			"label": "Default image",
+			"info": "Will be shown on collections/all"
+		},
+		{
+			"type": "select",
+			"id": "banner_height",
+			"label": "Height",
+			"options": [
+					{
+						"value": "one-hundred",
+						"label": "Full screen"
+					},
+					{
+						"value": "original-height",
+						"label": "Original"
+					},
+					{
+						"value": "big",
+						"label": "750px"
+					},
+					{
+						"value": "normal",
+						"label": "650px"
+					},
+					{
+						"value": "small",
+						"label": "550px"
+					}
+				],
+				"default": "normal"
+		},
+		{
+			"type": "select",
+			"id": "text_position",
+			"label": "Text position",
+			"default": "center",
+			"options": [
+				{ "label": "Left", "value": "left" },
+				{ "label": "Center", "value": "center" },
+				{ "label": "Right", "value": "right" },
+				{ "label": "Bottom left", "value": "bottom-left" },
+				{ "label": "Bottom right", "value": "bottom-right" }
+			]
+		},
+		{
+			"type": "select",
+			"id": "text_color",
+			"label": "Text color",
+			"default": "text-light",
+			"options": [
+				{
+					"value": "text-light",
+					"label": "Light"
+				},
+				{
+					"value": "text-dark",
+					"label": "Dark"
+				}
+			]
+		},
+		{
+			"type": "header",
+			"content": "Overlay"
+		},
+		{
+			"type": "range",
+			"id": "overlay_opacity",
+			"label": "Opacity",
+			"step": 5,
+			"max": 95,
+			"min": 0,
+			"unit": "%",
+			"default": 20
+		},
+		{
+			"type": "header",
+			"content": "Colors"
+		},
+		{
+			"type": "color",
+			"id": "bg_color",
+			"label": "Background",
+			"default": "#fafafa"
+		}
+	]
+}
+{% endschema %}

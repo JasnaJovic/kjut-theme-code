@@ -1,0 +1,79 @@
+{%- comment -%} FAQ page {%- endcomment -%}
+
+{%- assign show_page_title = section.settings.show_page_title -%}
+{%- assign heading = section.settings.title -%}
+{%- assign subheading = section.settings.subheading -%}
+{%- assign text = section.settings.text -%}
+
+<div data-section-id="{{ section.id }}" data-section-type="faq">
+	{%- unless heading == blank and subheading == blank and text == blank and section.blocks.size == 0 -%}
+		{%- render 'faq', heading: heading, subheading: subheading, text: text -%}
+	{%- endunless -%}
+
+	{%- if page.content != blank or show_page_title -%}
+		<div class="page-template">
+			<div class="wrapper wrapper--medium">
+				{%- if show_page_title -%}
+					<h1 class="page-title text-center">
+						{{- page.title -}}
+					</h1>
+				{%- endif -%}
+
+				{%- if page.content != blank -%}
+					<div class="rte">
+						{{- page.content -}}
+					</div>
+				{%- endif -%}
+			</div>
+		</div>
+	{%- endif -%}
+</div>
+
+{% schema %}
+{
+	"name": "FAQ",
+	"settings": [
+		{
+			"type": "checkbox",
+			"id": "show_page_title",
+			"label": "Show page title",
+			"default": false
+		},
+		{
+			"type": "text",
+			"id": "title",
+			"label": "Heading"
+		},
+		{
+			"type": "text",
+			"id": "subheading",
+			"label": "Subheading"
+		},
+		{
+			"type": "richtext",
+			"id": "text",
+			"label": "Text"
+		}
+	],
+	"blocks": [
+		{
+			"name": "Item",
+			"type": "item",
+			"settings": [
+				{
+					"type": "text",
+					"id": "title",
+					"label": "Question",
+					"default": "Question"
+				},
+				{
+					"type": "richtext",
+					"id": "answer",
+					"label": "Answer",
+					"default": "<p>Use this answer block to discuss some commonly asked questions you've discovered from your customers interactions. You could discuss product details, size fit, shipping policies, or anything you think would help merchants make an informed decision about your product or collection. This section will appear across all products.</p>"
+				}
+			]
+		}
+	]
+}
+{% endschema %}
